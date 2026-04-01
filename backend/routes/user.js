@@ -1,43 +1,20 @@
-/*const axios = require('axios');
+const express = require('express')
+const { getUser } = require('../callApi')
+const router = express.Router()
 
-// Requêter un utilisateur avec un ID donné.
-axios.get('/user?ID=12345')
-  .then(function (response) {
-    // en cas de réussite de la requête
-    console.log(response);
-  })
-  .catch(function (error) {
-    // en cas d’échec de la requête
-    console.log(error);
-  })
-  .finally(function () {
-    // dans tous les cas
-  });
+router.get('/check', (req, res) => {
+    if (!req.session.user)
+        return res.status(401).json({ error: 'Not logged in' })
+    res.json(req.session.user)
+})
 
-// la requête ci-dessus pourrait aussi être faite comme ceci :
-axios.get('/user', {
-    params: {
-      ID: 12345
+router.get('/:login', async (req, res) => {
+    try {
+        const data = await getUser(req.params.login)
+        res.json(data.login)
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || err.message)
     }
-  })
-  .then(function (response) {
-    console.log(response);
-  })
-  .catch(function (error) {
-    console.log(error);
-  })
-  .finally(function () {
-    // dans tous les cas
-  });  
+})
 
-// vous souhaitez utiliser async/await ?
-// ajoutez le mot-clé `async` à la fonction/méthode englobante
-async function getUser() {
-  try {
-    const response = await axios.get('/user?ID=12345');
-    console.log(response);
-  } catch (error) {
-    console.error(error);
-  }
-}
-*/ 
+module.exports = router

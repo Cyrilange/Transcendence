@@ -27,38 +27,32 @@ http://localhost:3000
 
 ---
 
-## test
+## test 
 
 curl http://localhost:3000/test
+
+## test db 
+
+curl http://localhost:3000/db-test
+
+## login
+
+http://localhost:3000/login 
+
+## check our log
+
+http://localhost:3000/user/check 
+
+## log out
+
+http://localhost:3000/logout 
 
 ## dependencies
 _npm install express axios body-parser dotenv_ for API42  
 _npm install better-sqlite3_ for database
-
-## schema 
-
-Client HTTP  --->  server.js (route /user/:login)
-                        |
-                        v
-                 callApi.js (getUser)
-                        |
-                        v
-                   auth.js (getToken)
-                        |
-                        v
-                  API 42 (HTTP request)
-                        |
-                        v
-                 	Return Data
-                        |
-                        v
-                  server.js -> res.json()
-                        |
-                        v
-                     Client
+_npm install express-session_ to keep session open 
 
 
-                     # 🃏 Top Trumps – Backend (Transcendence)
 
 ## 📌 Overview
 
@@ -69,25 +63,24 @@ The backend is built with **Node.js + Express** and integrates with the **42 API
 
 ---
 
-## ⚙️ Tech Stack
+##  Tech Stack
 
 * Node.js
 * Express
 * Axios (API calls)
 * dotenv (environment variables)
-* (Later) WebSockets / Socket.io for real-time gameplay
+* WebSockets / Socket.io for real-time gameplay
 
 ---
 
-## 🔐 Authentication
+##  Authentication
 
 * Uses **42 API (OAuth2)**
-* Currently using `client_credentials` flow (server-side)
-* Later: implement full OAuth login for users
+
 
 ---
 
-## 📦 Project Structure
+##  Project Structure
 
 ```
 backend/
@@ -107,13 +100,11 @@ backend/
 
 ###  Users
 
-```
+ex:
 GET    /user/:login        → fetch user from 42 API
 POST   /user               → create user (future DB)
 GET    /users              → list users
-```
 
----
 
 ### Cards
 
@@ -123,18 +114,7 @@ GET    /cards/:id          → get one card
 POST   /cards              → create a card
 ```
 
-Example card:
 
-```json
-{
-  "name": "Mbappe",
-  "speed": 95,
-  "shoot": 90,
-  "dribble": 92
-}
-```
-
----
 
 ###  Game
 
@@ -186,8 +166,13 @@ GET    /matchmaking/status
 ##  Important Notes
 
 * Do NOT commit `.env`
+{
+
+      this will need to be delete before sent 
+
+      :
+}
 * Token is required for all 42 API calls
-* Current backend is **stateless** (no DB yet)
 * Real-time gameplay will require **WebSockets**
 
 ---

@@ -1,23 +1,22 @@
+require('dotenv').config()
 const express = require('express')
-const { getUser } = require('./callApi')
+const session = require('express-session')
 const app = express()
 const port = 3000
+
 app.use(express.json())
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false }
+}))
 
-app.get('/user/:login', async (req, res) => { // exemple /user/csalamit
-  try { 
-    const data = await getUser(req.params.login) 
-    res.json(data) // format json as node.js work like that
-  } catch (err) {
-    res.status(err.response?.status || 500).json(err.response?.data || err.message)
-  }
-})
+app.use('/', require('./routes/auth'))
+app.use('/user', require('./routes/user'))
+app.use('/db', require('./routes/db'))
 
 
-//################################TEST#################################################
-app.get('/test', (req, res) => {
-	res.send('hello world')
-  })
+app.get('/test', (req, res) => res.send('hello world'))
 
-app.listen(port, () => console.log(`Server running on port ${port} `))
-//################################END OF TEST#################################################
+app.listen(port, '0.0.0.0', () => console.log(`Server running on port ${port}`))

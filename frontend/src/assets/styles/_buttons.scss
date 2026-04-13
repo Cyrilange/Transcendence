@@ -1,0 +1,16 @@
+@use 'base';
+
+.CardBtn{
+	text-align: left;
+	height: 24px;
+	border: 1px solid base.$secondary-color;
+	background-color: base.$glass-bg;
+	margin-bottom: 8px;
+}
+
+.CardBtn:hover{
+	border: 1px solid white;	
+}
+.CardBtn:active{
+	background-color: base.$primary-color;
+}

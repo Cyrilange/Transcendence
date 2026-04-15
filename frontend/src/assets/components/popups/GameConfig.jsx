@@ -12,10 +12,11 @@ import ModalClose from '@mui/joy/ModalClose';
 import FormControl from '@mui/joy/FormControl';
 
 import SliderSteps from '../sliders/SliderSteps';
-import SliderLabel from '../sliders/SliderLabel';
+//import SliderLabel from '../sliders/SliderLabel';
 import Button from '@mui/joy/Button';
 import ToggleButtonGroup from '@mui/joy/ToggleButtonGroup';
 import { FormLabel } from '@mui/joy';
+import Slider from '@mui/joy/Slider';
 
 const API_URL = 'http://localhost:3001/api/games';
 //import { useNavigate } from 'react-router-dom';
@@ -23,6 +24,29 @@ const API_URL = 'http://localhost:3001/api/games';
     e.preventDefault();
     < CreateGame />
   } */
+
+	const marks = [
+  {
+	value: 2,
+	label: '2',
+  },
+  {
+	value: 3,
+	label: '3',
+  },
+  {
+	value: 4,
+	label: '4',
+  },
+  {
+	value: 5,
+	label: '5',
+  },
+
+];
+function valueText(value) {
+  return `${value}`;
+}
 
 const GameConfig = ({showPopUp, closePopUp, title}) => {
 	const navigate = useNavigate();
@@ -36,9 +60,9 @@ const GameConfig = ({showPopUp, closePopUp, title}) => {
 
     const formData = new FormData(e.target);
     const config = {
-      playerCount: parseInt((3)),
+      playerCount: parseInt(formData.get('playerNbr')),
       vsComputer: formData.get('vsComputer') === 'true',
-      rounds: parseInt(10)
+      rounds: parseInt(formData.get('roundsNbr'))
     };
 	for (var pair of formData.entries()) {
   	 	 console.log(pair[0]+ ', ' + pair[1]); 
@@ -69,6 +93,8 @@ const GameConfig = ({showPopUp, closePopUp, title}) => {
 	const [showRounds, setShowRounds] = useState(false)
 	const [value, setValue] = React.useState('player');
 	const [rounds, setRounds] = React.useState('standard'); 
+	const [number, setNumber] = React.useState('playerNbr'); 
+	const [roundsNbr, setRoundsNbr] = React.useState('coundsNbr'); 
 	if (!showPopUp) {return null}
 
 	/* const formData = new FormData(form, submitter);
@@ -106,7 +132,23 @@ const GameConfig = ({showPopUp, closePopUp, title}) => {
 						</ToggleButtonGroup>
 					</Stack>
 					<Typography color="neutral" level='h4'>Number of players</Typography>
-					<SliderSteps  aria-label="Number of players" />
+					<Slider 
+						id="playerNbr"
+						name="playerNbr"
+						aria-label="Number of players"
+						defaultValue={2}
+						min={2}
+						max={5}
+						step={1}
+						//	getAriaValueText={valueText}
+						valueLabelDisplay="off"
+						value={number}
+						onChange={(event, newNumber) => {
+							setNumber(newNumber);
+						}}
+						marks={marks}
+					/>
+					{/* //<SliderSteps  aria-label="Number of players" /> */}
 					
 					{showDifficulty &&(
 					<FormControl>
@@ -132,11 +174,27 @@ const GameConfig = ({showPopUp, closePopUp, title}) => {
 					<div>
 					{/* 	<Typography color="neutral" level='h4'>Number of rounds</Typography> */}
 						<FormLabel>Number of rounds</FormLabel>
-						<SliderLabel name="rounds" aria-label="Number of rounds"
-							onChange={(event) => {
-							setRounds(event.target.value);
+						    <Slider
+							id="roundsNbr"
+							name="roundsNbr" 
+							value={roundsNbr}
+							aria-label="Custom marks"
+							defaultValue={20}
+							min={10}
+							max={30}
+							step={1}
+							getAriaValueText={valueText}
+							valueLabelDisplay="true"
+							onChange={(event, newRoundsNbr) => {
+								setRoundsNbr(newRoundsNbr);
 						}}
+							
 						/>
+						{/* <SliderLabel id="roundsNbr" name="roundsNbr" value={roundsNbr} aria-label="Number of rounds"
+							onChange={(event, newRoundsNbr) => {
+								setRoundsNbr(newRoundsNbr);
+						}}
+						/> */}
 					</div>
 					)}
 					<Button sx={{marginTop: '15px'}} type="submit" variant="solid" disabled={loading}>  {loading ? 'Creating...' : 'Start Game'}</Button>				

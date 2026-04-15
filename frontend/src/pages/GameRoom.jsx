@@ -48,7 +48,7 @@ const GameRoom = () => {
       <h2>Game ID: {gameId}</h2>
       <p>Status: {gameState.status}</p>
       <p>Players: {gameState.players.length} / {gameState.config.playerCount}</p>
-      <p>Round: {gameState.currentRound}</p>
+      <p>Round: {gameState.currentRound} / {gameState.config.rounds}</p>
      
       <p>Game is live! Waiting for actions...</p>
       <Stack direction="row" spacing={2} justifyContent="center">
@@ -57,6 +57,7 @@ const GameRoom = () => {
 			//<div className='CardSlot'>
         <Card 
             key={player.id}
+            id={player.id}
             login={player.login}
             points={player.points} 
             wallet={player.wallet} 

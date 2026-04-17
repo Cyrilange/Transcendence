@@ -13,7 +13,19 @@ class GameService {
     this.userJsonPath = path.join(__dirname, '../data/user.json');
       console.log('GameService instance created'); // ← add this
   }
-
+  parseStartDate(month, year) {
+    if (!year) return null;
+    const monthMap = {
+      january: 1, february: 2, march: 3, april: 4,
+      may: 5, june: 6, july: 7, august: 8,
+      september: 9, october: 10, november: 11, december: 12
+    };
+    const m = monthMap[month?.toLowerCase()] || 1;
+    const y = parseInt(year, 10);
+    if (isNaN(y)) return null;
+    // Store as YYYYMM number for easy comparison
+    return y * 100 + m;
+  }
   // Load and parse user.json with proper types
   loadUserDeck() {
     try {
@@ -26,9 +38,10 @@ class GameService {
         points: parseInt(0) || 0,
         wallet: parseInt(user.wallet, 10) || 0,
         correction_point: parseInt(user.correction_point, 10) || 0,
-        // Parse dates properly
-        pool_month: this.parseDate(user.pool_month),
-        pool_year: this.parseDate(user.pool_year)
+        pool_month: user.pool_month || null,
+        pool_year: user.pool_year || null,
+        
+        startDate: this.parseStartDate(user.pool_month, user.pool_year)
       }));
     } catch (error) {
       console.error('Error loading user.json:', error);
@@ -65,8 +78,8 @@ class GameService {
         points: parseInt(0) || 0,
         wallet: parseInt(card.wallet, 10) || 0,
         correction_point: parseInt(card.correction_point, 10) || 0,
-        pool_month: this.parseDate(card.pool_month),
-        pool_year: this.parseDate(card.pool_year)
+        pool_month: card.pool_month,
+        pool_year: card.pool_year
       }));
     });
 
@@ -131,11 +144,12 @@ class GameService {
       card: {
         ...card,
         // Ensure types are correct
+        login: cards.login,
         points: parseInt(0) || 0,
         wallet: parseInt(card.wallet, 10) || 0,
         correction_point: parseInt(card.correction_point, 10) || 0,
-        pool_month: this.parseDate(card.pool_month),
-        pool_year: this.parseDate(card.pool_year)
+        pool_month: card.pool_month,
+        pool_year: card.pool_year
       },
       roundWins: 0,
       totalPoints: 0
@@ -192,9 +206,13 @@ class GameService {
         console.log(`  ${player.id} plays: ${value} (${comparisonField})`);
       });
        // step 2: Find winner(s) — handle ties
-      const highestValue = Math.max(...topCards.map(t => t.value));
+      const isLowerWins = comparisonField === 'startDate';
 
-      const winners = topCards.filter(t => t.value === highestValue); //this will be updated to also check lower pool_date 
+      const highestValue = isLowerWins
+        ? Math.min(...topCards.map(t => t.value).filter(v => v !== null && v !== 0))
+        : Math.max(...topCards.map(t => t.value));
+
+      const winners = topCards.filter(t => t.value === highestValue); //this will be updated to also check lower pool_date
       const losers  = topCards.filter(t => t.value !== highestValue);
 
       activePlayers.forEach(p => p.hand.shift());
@@ -221,6 +239,7 @@ class GameService {
     } else {
       // Single winner collects the whole pile
       const winner = winners[0].player;
+      const winingCard = winners[0].card.login;
       winner.hand.push(...game.pile);
       winner.roundWins += 1;
 
@@ -237,14 +256,21 @@ class GameService {
         winnerId: winner.id,
         losers: losers.map(l => l.player.id),
         comparisonField,
-        winningValue: highestValue
+        winningValue: highestValue, 
+        winningCard: winingCard
       };
+    }
+    
+    console.log('About to return game:', game ? 'exists' : 'undefined');
+    console.log('Game keys:', Object.keys(game));
+    const activAfter = game.players.filter(p => p.hand.length > 0);
+    if (activAfter.length === 1) {
+      game.status = 'finished';
+      game.winner = activAfter[0];
     }
 
     game.roundWinners.push(roundResult);
     game.lastRoundResult = roundResult;
-    console.log('About to return game:', game ? 'exists' : 'undefined');
-    console.log('Game keys:', Object.keys(game));
     return game;
   }
   // End game and determine overall winner

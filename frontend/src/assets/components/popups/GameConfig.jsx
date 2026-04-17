@@ -60,7 +60,7 @@ const GameConfig = ({showPopUp, closePopUp, title}) => {
     };
 	for (var pair of formData.entries()) {
   	 	 console.log(pair[0]+ ', ' + pair[1]); 
-}
+	}
 	
     try {
       // Axios automatically handles JSON stringification and parsing
@@ -143,6 +143,7 @@ const GameConfig = ({showPopUp, closePopUp, title}) => {
 						marks={marks}
 					/>
 					{/* //<SliderSteps  aria-label="Number of players" /> */}
+					
 					
 					{showDifficulty &&(
 					<FormControl>

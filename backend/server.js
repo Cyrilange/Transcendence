@@ -30,9 +30,9 @@ const io = new Server(server, {
   }
 });
 
-/* app.use('/', require('./routes/auth'))
+app.use('/', require('./routes/auth'))
 app.use('/user', require('./routes/user'))
-app.use('/db', require('./routes/db')) */
+app.use('/db', require('./routes/db'))
 
 app.post('/api/games', (req, res) => {
   try {
@@ -84,7 +84,7 @@ app.post('/api/games/:gameId/join', (req, res) => {
 app.post('/api/games/:gameId/play-round', (req, res) => {
   try {
     const { gameId } = req.params;
-    const { comparisonField = 'points' } = req.body;
+    const { comparisonField = 'correction_point' } = req.body;
 
     const game = gameService.playRound(gameId, comparisonField);
 
@@ -111,6 +111,8 @@ io.on('connection', (socket) => {
       socket.join(gameId);
       socket.gameId = gameId;
       
+      console.log('Players on join:', game.players.map(p => ({ id: p.id, handSize: p.hand.length })));
+
       // Update player socket reference
       const player = game.players.find(p => p.socketId === socket.id);
       if (player) {
@@ -129,9 +131,15 @@ io.on('connection', (socket) => {
       let game;
       
       if (action === 'play_round') {
-        game = gameService.playRound(gameId, comparisonField);
+         console.log('play_action received:', { gameId, action, comparisonField });
+       // console.log('current player stats:', game.players.map(p => ({ id: p.id, handSize: p.hand.length })));
+          game = gameService.playRound(gameId, comparisonField);
       }
-      
+      if (!game) {
+        socket.emit('error', { message: 'playRound returned no game state' });
+        return;
+      }
+      console.log('Emitting game state, lastRoundResult:', game?.lastRoundResult);
       io.to(gameId).emit('game_state', game);
     } catch (error) {
       socket.emit('error', { message: error.message });
@@ -142,7 +150,7 @@ io.on('connection', (socket) => {
     console.log('User disconnected:', socket.id);
     
     // Clean up game if needed
-    if (socket.gameId) {
+   /*  if (socket.gameId) {
       const game = gameService.getGame(socket.gameId);
       if (game) {
         const playerIndex = game.players.findIndex(p => p.socketId === socket.id);
@@ -150,8 +158,8 @@ io.on('connection', (socket) => {
           game.players.splice(playerIndex, 1);
           io.to(socket.gameId).emit('game_state', game);
         }
-      }
-    }
+      } 
+    }*/
   });
 });
 
@@ -160,5 +168,3 @@ server.listen(3001, () => {
 });
 
 //app.get('/test', (req, res) => res.send('hello world'))
-
-app.listen(port => console.log(`Server running on port ${port}`))

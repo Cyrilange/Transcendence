@@ -19,12 +19,6 @@ import { FormLabel } from '@mui/joy';
 import Slider from '@mui/joy/Slider';
 
 const API_URL = 'http://localhost:3001/api/games';
-//import { useNavigate } from 'react-router-dom';
-/*  function handleSubmit(e) {
-    e.preventDefault();
-    < CreateGame />
-  } */
-
 	const marks = [
   {
 	value: 2,
@@ -175,26 +169,20 @@ const GameConfig = ({showPopUp, closePopUp, title}) => {
 					{/* 	<Typography color="neutral" level='h4'>Number of rounds</Typography> */}
 						<FormLabel>Number of rounds</FormLabel>
 						    <Slider
-							id="roundsNbr"
-							name="roundsNbr" 
-							value={roundsNbr}
-							aria-label="Custom marks"
-							defaultValue={20}
-							min={10}
-							max={30}
-							step={1}
-							getAriaValueText={valueText}
-							valueLabelDisplay="true"
-							onChange={(event, newRoundsNbr) => {
-								setRoundsNbr(newRoundsNbr);
-						}}
-							
+								id="roundsNbr"
+								name="roundsNbr" 
+								value={roundsNbr}
+								aria-label="Custom marks"
+								defaultValue={20}
+								min={10}
+								max={30}
+								step={1}
+								getAriaValueText={valueText}
+								valueLabelDisplay="true"
+								onChange={(event, newRoundsNbr) => {
+									setRoundsNbr(newRoundsNbr);
+							}}
 						/>
-						{/* <SliderLabel id="roundsNbr" name="roundsNbr" value={roundsNbr} aria-label="Number of rounds"
-							onChange={(event, newRoundsNbr) => {
-								setRoundsNbr(newRoundsNbr);
-						}}
-						/> */}
 					</div>
 					)}
 					<Button sx={{marginTop: '15px'}} type="submit" variant="solid" disabled={loading}>  {loading ? 'Creating...' : 'Start Game'}</Button>				

@@ -88,7 +88,8 @@ class GameService {
 //Error: Cannot read properties of undefined (reading 'hand')
 //Error: Cannot read properties of undefined (reading 'id')
   // Create new game
-  createGame(gameId, playerCount, vsComputer, rounds) {
+  createGame(gameId, playerCount, vsComputer, rounds, gameType = 'endless') {
+     console.log('createGame called with:', { gameId, playerCount, vsComputer, rounds, gameType });
     const deck = this.loadUserDeck();
     const shuffledDeck = this.shuffleDeck(deck);
 
@@ -104,16 +105,16 @@ class GameService {
 
     const gameState = {
       id: gameId,
-      //status: 'waiting',
-      status: 'playing',
-      config: { playerCount, vsComputer, rounds },
-     // players: [],
+      //status: 'waiting', 
+      status: 'playing', //hardcoded for testing
+      config: { playerCount, vsComputer, rounds, gameType },
       players,
       deck: shuffledDeck,
       pile: [],  
       currentRound: 0,
       roundWinners: [],
       winner: null,
+      winners: null, //in case of draw
       createdAt: new Date().toISOString()
     };
     
@@ -222,7 +223,7 @@ class GameService {
       game.currentRound += 1;
 
       let roundResult;
-
+      
       if (winners.length > 1) {
         // Draw — pile carries over, no hand changes beyond the shift
         console.log(`  DRAW between: ${winners.map(w => w.player.id).join(', ')} — pile is now ${game.pile.length} cards`);
@@ -235,6 +236,7 @@ class GameService {
           comparisonField,
           winningValue: highestValue
         };
+       
 
     } else {
       // Single winner collects the whole pile
@@ -242,7 +244,6 @@ class GameService {
       const winingCard = winners[0].card.login;
       winner.hand.push(...game.pile);
       winner.roundWins += 1;
-
       console.log(`  WINNER: ${winner.id} collects ${game.pile.length} cards — hand now ${winner.hand.length}`);
       losers.forEach(({ player }) => {
         console.log(`  ${player.id} lost — hand now ${player.hand.length}`);
@@ -263,10 +264,37 @@ class GameService {
     
     console.log('About to return game:', game ? 'exists' : 'undefined');
     console.log('Game keys:', Object.keys(game));
-    const activAfter = game.players.filter(p => p.hand.length > 0);
-    if (activAfter.length === 1) {
+    const activeAfter = game.players.filter(p => p.hand.length > 0);
+
+    if (game.config.gameType === "rounds" && game.currentRound >= game.config.rounds) {
+    
+      const maxCards = Math.max(...game.players.map(p => p.hand.length));
+      const roundsWinners = game.players.filter(p => p.hand.length === maxCards);
+
       game.status = 'finished';
-      game.winner = activAfter[0];
+      if (roundsWinners.length > 1) {
+        // Tie on card count
+        game.winner = null;
+        game.winners = roundsWinners;
+      } else {
+        game.winner = roundsWinners[0];
+        game.winners = null;
+      }
+
+} else if (game.config.gameType !== 'rounds' && activeAfter.length <= 1) {
+//} else if (game.config.gameType !== 'rounds' && activeAfter.length <= 1) {
+    // Endless mode — last player with cards wins
+      game.status = 'finished';
+    
+      if (activeAfter.length === 0) { 
+        // Everyone ran out on the same round — full draw
+        game.winner = null;
+        game.winners = game.players; 
+      } else {
+        game.winner = activeAfter[0];
+        game.winners = null;
+      }
+
     }
 
     game.roundWinners.push(roundResult);

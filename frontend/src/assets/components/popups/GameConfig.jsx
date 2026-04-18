@@ -52,15 +52,17 @@ const GameConfig = ({showPopUp, closePopUp, title}) => {
     setLoading(true);
     setError(null);
 
-    const formData = new FormData(e.target);
+   // const formData = new FormData(e.target);
     const config = {
-      playerCount: parseInt(formData.get('playerNbr')),
-      vsComputer: formData.get('vsComputer') === 'true',
-      rounds: parseInt(formData.get('roundsNbr'))
-    };
-	for (var pair of formData.entries()) {
-  	 	 console.log(pair[0]+ ', ' + pair[1]); 
+      	playerCount: number,                        
+    	vsComputer: value === 'computer',             
+		rounds: showRounds ? roundsNbr : null,       
+		gameType: showRounds ? 'rounds' : 'endless'  
 	}
+	/* for (var pair of formData.entries()) {
+  	 	 console.log(pair[0]+ ', ' + pair[1]); 
+	} */
+	console.log('Game config being sent:', config);
 	
     try {
       // Axios automatically handles JSON stringification and parsing
@@ -87,8 +89,8 @@ const GameConfig = ({showPopUp, closePopUp, title}) => {
 	const [showRounds, setShowRounds] = useState(false)
 	const [value, setValue] = React.useState('player');
 	const [rounds, setRounds] = React.useState('standard'); 
-	const [number, setNumber] = React.useState('playerNbr'); 
-	const [roundsNbr, setRoundsNbr] = React.useState('coundsNbr'); 
+	const [number, setNumber] = React.useState(2); 
+	const [roundsNbr, setRoundsNbr] = React.useState(20);
 	if (!showPopUp) {return null}
 
 	/* const formData = new FormData(form, submitter);

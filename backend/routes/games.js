@@ -5,18 +5,18 @@ const gameService = require('../services/gameService.js')
 const router = express.Router();
 
 // Create game
-router.post('/', (req, res) => {
+/*r outer.post('/', (req, res) => {
   try {
     const { playerCount, vsComputer, rounds } = req.body;
     const gameId = uuidv4();
     
-    const game = gameService.createGame(gameId, playerCount, vsComputer, rounds);
+    const game = gameService.createGame(gameId, playerCount, vsComputer, rounds, );
     
     res.json({ gameId });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+}); */
 
 // Join game
 router.post('/:gameId/join', (req, res) => {

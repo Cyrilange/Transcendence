@@ -36,14 +36,15 @@ app.use('/db', require('./routes/db'))
 
 app.post('/api/games', (req, res) => {
   try {
-    const { playerCount, vsComputer, rounds } = req.body;
+    const { playerCount, vsComputer, rounds, gameType } = req.body;
 
     if (!playerCount || playerCount < 2 || playerCount > 4) {
       return res.status(400).json({ error: "Invalid player count" });
     }
 
     const gameId = uuidv4();
-    const gameState = gameService.createGame(gameId, playerCount, vsComputer, rounds || 5);
+    const gameState = gameService.createGame(gameId, playerCount, vsComputer, rounds, gameType);
+  
 
     res.json({ 
       success: true, 
@@ -108,6 +109,7 @@ io.on('connection', (socket) => {
     const game = gameService.getGame(gameId);
     
     if (game) {
+       console.log('Game config on join:', game.config);
       socket.join(gameId);
       socket.gameId = gameId;
       

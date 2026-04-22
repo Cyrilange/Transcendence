@@ -1,76 +1,239 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef  } from 'react';
 import { useParams } from 'react-router-dom';
 import Card from '../assets/components/cards/Cards';
-import Deck from '../user.json';
 import io from 'socket.io-client';
 import Stack from '@mui/joy/Stack'
-const socket = io('http://localhost:3001');
+import Badge from '@mui/joy/Badge';
+import Button from '@mui/joy/Button';
+
+//import Result from '../assets/components/popups/Result'
+import GameAlert from '../assets/components/popups/GameAlert';
 
 
-
+const BlankCard = ({ playerId, handSize }) => (
+  <div style={{
+    width: 200,
+    minHeight: 320,
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    gap: '8px'
+  }}>
+    <p style={{ margin: 0, fontWeight: 'bold' }}>{playerId}</p>
+    <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.7 }}>
+      {handSize > 0 ? `${handSize} cards remaining` : 'No cards left'}
+    </p>
+  </div>
+);
 
 const GameRoom = () => {
   const { gameId } = useParams();
   const [gameState, setGameState] = useState(null);
-  //const [socketConnected, setSocketConnected] = useState(false);
   const [status, setStatus] = useState('Connecting...');
-  const [cards, setCards] = useState([]);
+  const [roundMessage, setRoundMessage] = useState(null); // null | { type, text }
+  const [gameOver, setGameOver] = useState(null); // { winner, winners, isDraw }const socketRef = useRef(null); 
+  const socketRef = useRef(null);
 
-  //console.log("Current Game ID:", gameId); // Add this to check if it's undefined
-
+  const handlePlayAgain = () => {
+        // Navigate back to lobby — adjust path to match your router setup
+        window.location.href = '/';
+  };
   useEffect(() => {
-    // Join the room
-    //console.log("Raw Data Loaded:", Deck); // <-
-    setCards(Deck);
-    socket.emit('join_game', gameId);
-    // Listen for state updates
-    socket.on('game_state', (state) => {
-      setGameState(state);
-      setStatus('Connected');
-	
+    const socket = io('http://localhost:3001'); //should be variable to out network
+    socketRef.current = socket;
+    
+   socket.on('connect', () => {
+     socket.emit('join_game', gameId);
     });
 
-    socket.on('error', (err) => {
+   socket.on('game_state', (state) => {
+      //console.log('lastRoundResult received:', JSON.stringify(state.lastRoundResult, null, 2));
+
+      setGameState(state);
+      setStatus('Connected');
+      if (state.status === 'finished') {
+        if (state.winners && state.winners.length > 1) {
+          setGameOver({ isDraw: true, winners: state.winners, winner: null });
+        } else {
+          setGameOver({ isDraw: false, winner: state.winner, winners: null });
+        }
+      }
+     
+
+      const result = state.lastRoundResult;
+      if (!result) return;
+      if (result.type === 'draw') {
+      const who = Array.isArray(result.drawBetween) 
+        ? result.drawBetween.join(' and ') 
+        : 'unknown players';
+      setRoundMessage({
+        type: 'warning',
+        text: `Round ${result.round}: DRAW between ${who}! Pile grows to ${result.pileSize ?? 0} cards.`
+        });
+      } else if (result.type === 'winner') {
+        const winner = result.winnerId ?? 'unknown';
+  
+        setRoundMessage({
+          type: 'success',
+          text: `Round ${result.round}: WINNER: ${winner} wins with ${result.winningCard} in ${result.comparisonField}!`
+        });
+      }
+    });
+
+   socket.on('error', (err) => {
       setStatus(`Error: ${err.message}`);
     }); 
 
     return () => {
-      socket.off('game_state');
-      socket.off('error');
+     socket.off('game_state');
+     socket.off('error');
+     socket.disconnect();
     };
   }, [gameId]);
 
+  const handlePlayRound = (comparisonField) => {
+    /*  if (socketRef.current?.connected) {
+      socketRef.current.emit('play_action', { gameId, action: 'play_round', comparisonField });
+    } */
+    const game = gameState;
+    if (game.activePlayerId !== localPlayerId) return; // guard — not your turn
+    
+    console.log('Emitting play_action for gameId:', gameId);
+    if (socketRef.current?.connected) {
+      console.log('Socket connected:', socketRef.current.connected);
+      socketRef.current.emit('play_action', {
+        gameId,
+        action: 'play_round',
+        comparisonField,
+        playerId: localPlayerId
+      });
+    } else {
+    console.log('No socket ref!');
+  }
+  };
+
   if (status.includes('Error')) return <div>{status}</div>;
   if (!gameState) return <div>Loading Game State...</div>;
+  
+  const localPlayerId = 'player_1';
+  const isMyTurn = gameState.activePlayerId === localPlayerId;
+  const isBotThinking = !isMyTurn && gameState.players.find(
+    p => p.id === gameState.activePlayerId
+  )?.isBot;
 
+  //const [gameWinner, setGameWinner] = useState(null);
+
+  // Inside game_state handler, after setGameState:
+  
+  console.log(gameState.config.gameType);
   return (
-    <div className="game-room">
-      <h2>Game ID: {gameId}</h2>
+    <div>
+  
+    <Stack direction="row" justifyContent={"space-around"}>
       <p>Status: {gameState.status}</p>
       <p>Players: {gameState.players.length} / {gameState.config.playerCount}</p>
-      <p>Round: {gameState.currentRound}</p>
-     
-      <p>Game is live! Waiting for actions...</p>
-      <Stack direction="row" spacing={2} justifyContent="center">
+    </Stack>
       
-        {cards.slice(0, gameState.config.playerCount).map((player, id) => (
-			//<div className='CardSlot'>
-        <Card 
-            key={player.id}
-            login={player.login}
-            points={player.points} 
-            wallet={player.wallet} 
-            correction_point={player.correction_point}
-            pool_month={player.pool_month}
-            pool_year={player.pool_year}
-            url={player.image.versions.small} 
-          />
+      <p>Round: {gameState.currentRound} {gameState.config.gameType === 'rounds' ? `/ ${gameState.config.rounds}` : ''}</p>
+      <p>Pile: {gameState.pile?.length ?? 0} cards</p>
+      <p>Game is live! Waiting for actions...</p>
+      {/* Round result message */}
+      {roundMessage && (
+        <GameAlert roundMessage={roundMessage}
+          color={roundMessage.type === 'draw' ? 'warning' : 'success'}
+          sx={{ mb: 2 }}
+        >
+          {roundMessage.text}
+        </GameAlert>
+      )}
+       <p style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                {isBotThinking
+                  ? `🤖 ${gameState.activePlayerId} is thinking...`
+                  : isMyTurn
+                  ? '🟢 Your turn — pick a stat!'
+                  : `⏳ Waiting for ${gameState.activePlayerId}...`
+                }
+              </p>
+      <Stack direction="row" spacing={2} justifyContent="center">
+      {gameState.players
+        .filter(player => player && player.hand && player.hand.length > 0)
+        .map((player, index) => {
+          const isLocal = player.id === localPlayerId;
+          const hasCards = player.hand && player.hand.length > 0;
+          const topCard = player.hand[0];
+          if (!topCard) return null;
 
-          // </div>
-        ))}
-        </Stack>
-	
-    
+          return (
+            <div key={player.id } style={{ opacity: isMyTurn ? 1 : 0.5, transition: 'opacity 0.3s' }}>
+             
+              {isLocal && hasCards ? (
+              <Badge
+                  badgeContent={player.hand.length}
+                  color="neutral"
+                  variant="plain"
+                >
+                <Card
+                  id={topCard.id}
+                  login={topCard.login}
+                  wallet={topCard.wallet}
+                  correction_point={topCard.correction_point}
+                  pool_month={topCard.pool_month}
+                  pool_year={topCard.pool_year}
+                  url={topCard.image?.versions?.small}
+                  onPlayStat={isMyTurn ? handlePlayRound : null}
+                />
+                </Badge>
+              ) : (
+                <BlankCard
+                    playerId={player.id}
+                    handSize={player.hand?.length ?? 0}
+                  />
+                )}
+            
+              <h4 style={{ textAlign: 'center' }}>{player.id}</h4>
+            </div>
+          );
+        })}
+      </Stack> 
+
+      {gameOver && (
+      /* change this to be a modal maybe popup component*/
+      <div style={{
+        position: 'fixed', inset: 0,
+        background: 'rgba(0,0,0,0.7)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 1000
+      }}>
+     
+        <Stack  sx={{ minWidth: 300, textAlign: 'center', backgroundColor: 'grey', padding: '8px', borderRadius: '5px' }}>
+           {gameOver.isDraw ? (
+              <>
+                <h2>🤝 It's a Draw!</h2>
+                <p>Drawn between: {gameOver.winners.map(w => w.id).join(', ')}</p>
+                <p>Rounds played: {gameState.currentRound}</p>
+              </>
+            ) : (
+              <>
+                <h2>{gameOver.winner?.id === localPlayerId ? '🏆 You Win!' : '💀 You Lose!'}</h2>
+                <h3>Winner: {gameOver.winner?.id}</h3>
+                {/* Show all players' results */}
+                {gameState.players.map(p => (
+                  <p key={p.id} style={{ margin: '2px 0' }}>
+                    {p.id}: {p.hand.length} cards — {p.roundWins} round wins
+                    {p.id === gameOver.winner?.id ? ' 🏆' : ''}
+                  </p>
+                ))}
+              </>
+            )}
+            <Button variant="solid" color="primary" onClick={handlePlayAgain}>Play Again</Button>
+            <Button variant="outlined" color="neutral" onClick={() => window.location.href = '/'}>Quit</Button>
+          </Stack>
+      </div>
+      )}
     </div>
   );
 };

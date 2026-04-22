@@ -4,12 +4,12 @@ import CardActions from '@mui/joy/CardActions'
 import CardContent from '@mui/joy/CardContent'
 
 
-const Cards = ({id,login, url,  correction_point, wallet, pool_month, pool_year, onPlayStat}) => {
- const handleClick = (statName) => {
+const UserCard = ({id,login, url, games_won}) => {
+ /* const handleClick = (statName) => {
     if (onPlayStat) {
       onPlayStat(statName);
     }
-  };
+  }; */
   return (
     <Card size="sm" variant="outlined" color='primary' sx={{ width: 200, bgcolor: 'transparent'}}>
      
@@ -21,10 +21,14 @@ const Cards = ({id,login, url,  correction_point, wallet, pool_month, pool_year,
         <img src={url} alt={login} style={{ width: '100%', height: '175px', objectFit: 'cover', borderRadius: '4px' }} />
           <CardActions orientation='vertical' >
        
-            <Button variant='outlined' size='sm' sx={{placeContent: "space-between"}} onClick={() => handleClick('wallet')}><strong>Wallet:</strong> {wallet}</Button>
+            <Button variant='outlined' size='sm'sx={{placeContent: "space-between"}}  ><strong>games_won: </strong> {games_won}  </Button>
+            <Button variant='outlined' size='sm' sx={{placeContent: "space-between"}}><strong>edit profile</strong></Button>
+            <Button  variant='outlined' size='sm' sx={{placeContent: "space-between"}} ><strong>logout </strong> </Button>
+   
+           {/*  <Button variant='outlined' size='sm' sx={{placeContent: "space-between"}} onClick={() => handleClick('wallet')}><strong>Wallet:</strong> {wallet}</Button>
             <Button variant='outlined' size='sm'sx={{placeContent: "space-between"}} onClick={() => handleClick('startDate')} ><strong>Pool date: </strong> {pool_month}  {pool_year} </Button>
             <Button  variant='outlined' size='sm' sx={{placeContent: "space-between"}} onClick={() => handleClick('correction_point')}><strong>correction_point: </strong> {correction_point}</Button>
-   
+    */}
           </CardActions>
         </CardContent>
       
@@ -34,4 +38,4 @@ const Cards = ({id,login, url,  correction_point, wallet, pool_month, pool_year,
 };
 
 
-export default Cards;
+export default UserCard;

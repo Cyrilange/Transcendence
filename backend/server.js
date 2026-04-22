@@ -115,12 +115,48 @@ const io = new Server(server, {
 //socket
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
+  function triggerBotTurnIfNeeded(gameId, io) {
+  const game = gameService.getGame(gameId);
 
+  if (!game || game.status !== 'playing') return;
+
+  const activePlayer = game.players.find(p => p.id === game.activePlayerId);
+
+  if (!activePlayer?.isBot) return; // human's turn, stop
+
+  setTimeout(() => {
+    try {
+      const updatedGame = gameService.playRound(gameId, null, game.activePlayerId);
+      io.to(gameId).emit('game_state', updatedGame);
+      triggerBotTurnIfNeeded(gameId, io);
+    } catch (err) {
+      console.error('Bot turn error:', err.message);
+    }
+  }, 2500);
+}
   socket.on('join_game', (gameId) => {
     const game = gameService.getGame(gameId);
 
     if (!game) {
       return socket.emit('error', { message: 'Game not found' });
+    
+    if (game) {
+      console.log('Game config on join:', game.config);
+      socket.join(gameId);
+      socket.gameId = gameId;
+      
+      console.log('Players on join:', game.players.map(p => ({ id: p.id, handSize: p.hand.length })));
+
+      // Update player socket reference
+      const player = game.players.find(p => p.socketId === socket.id);
+      if (player) {
+        player.socketId = socket.id;
+      }
+      console.log('User connected to game:', socket.gameId);
+      socket.emit('game_state', game);
+      socket.to(gameId).emit('player_joined', { userId: socket.id });
+    } else {
+      socket.emit('error', { message: 'Game not found' });
     }
 
     socket.join(gameId);
@@ -132,20 +168,26 @@ io.on('connection', (socket) => {
     console.log('User joined game:', gameId);
   });
 
-  socket.on('play_action', ({ gameId, action, comparisonField }) => {
+  socket.on('play_action', ({ gameId, action, comparisonField, playerId  }) => {
     try {
-      let game;
+    if (action === 'play_round') {
+      console.log('play_action received:', { gameId, comparisonField, playerId });
 
-      if (action === 'play_round') {
-        game = gameService.playRound(gameId, comparisonField);
+      const game = gameService.playRound(gameId, comparisonField, playerId);
+
+      if (!game) {
+        socket.emit('error', { message: 'playRound returned no game state' });
+        return;
       }
 
       io.to(gameId).emit('game_state', game);
-
-    } catch (error) {
-      socket.emit('error', { message: error.message });
+      triggerBotTurnIfNeeded(gameId, io);
     }
-  });
+  } catch (error) {
+    console.error('play_action error:', error);
+    socket.emit('error', { message: error.message });
+  }
+});
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);

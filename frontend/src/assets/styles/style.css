@@ -1,8 +1,3 @@
-.Overlay {
-  background-color: black;
-  opacity: 100%;
-}
-
 body {
   font-family: Arial, sans-serif;
   margin: 0px;
@@ -43,60 +38,6 @@ a {
   margin-right: 5px;
 }
 
-/* .DefaultBtn{
-	//width: 100%;
-	grid-column: auto / span 1;
-	padding: 5px;
-	height: 48px;
-	min-width: 48px;
-	width: 100%;
-	font-size : 12px;
-	margin: 5px;
-	border-radius: 5px;
-	border: 1.5px solid base.$primary-color;
-	background-color: base.$light-color;
-	-webkit-box-shadow: 0px 0px 8px 1px rgba(0,0,0,0.5); 
-	box-shadow: -1px 1px 1px 1px rgba(81, 105, 117, 0.5);
-}
-.DefaultBtn:active{
-	color: base.$secondary-color;
-	border: 1.5px solid base.$secondary-color;
-	background-color: base.$primary-color;
-}
-.DefaultBtn:hover{
-	box-shadow: -1px 1px 1px 1px rgba(36, 76, 53, 0.5);
-	border: 1.5px solid base.$green-color;
-	background-color: base.$green-color;
-}
- */
-.CardBtn {
-  text-align: left;
-  height: 24px;
-  border: 1px solid #202020;
-  background-color: rgba(255, 255, 255, 0.03);
-  margin-bottom: 8px;
-}
-
-.CardBtn:hover {
-  border: 1px solid white;
-}
-
-.CardBtn:active {
-  background-color: #223843;
-}
-
-.ClosePopupBtn {
-  grid-column: auto/span 1;
-  padding: 5px;
-  height: 32px;
-  min-width: 32px;
-  font-size: 12px;
-  margin: 5px;
-  border-radius: 5px;
-  border: 1.5px solid #202020;
-  background-color: rgba(255, 255, 255, 0.03);
-}
-
 .flexColumn {
   display: flex;
   flex-direction: column;
@@ -120,20 +61,6 @@ a {
   position: sticky;
   bottom: 3px;
   text-align: center;
-}
-
-.headerPopup {
-  display: flex;
-  flex-direction: row;
-  place-content: space-between;
-  align-items: flex-start;
-}
-
-.Row_10 {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  flex-basis: 100%;
 }
 
 @media (min-width: 200px) {

@@ -4,11 +4,8 @@ const session = require('express-session')
 
 const { Server } = require('socket.io');
 const cors = require('cors')
-//const { v4: uuidv4 } = require('uuid');
 const http = require('http')
 const gameService = require('./services/gameService')
-//const gameRoutes = require('./routes/games')
-
 
 const port = 3001;
 const app = express();
@@ -38,7 +35,25 @@ app.use('/db', require('./routes/db'))
 // Socket.io ServicegameService
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
+  function triggerBotTurnIfNeeded(gameId, io) {
+  const game = gameService.getGame(gameId);
 
+  if (!game || game.status !== 'playing') return;
+
+  const activePlayer = game.players.find(p => p.id === game.activePlayerId);
+
+  if (!activePlayer?.isBot) return; // human's turn, stop
+
+  setTimeout(() => {
+    try {
+      const updatedGame = gameService.playRound(gameId, null, game.activePlayerId);
+      io.to(gameId).emit('game_state', updatedGame);
+      triggerBotTurnIfNeeded(gameId, io);
+    } catch (err) {
+      console.error('Bot turn error:', err.message);
+    }
+  }, 2500);
+}
   socket.on('join_game', (gameId) => {
     const game = gameService.getGame(gameId);
     
@@ -62,40 +77,29 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('play_action', ({ gameId, action, comparisonField }) => {
+  socket.on('play_action', ({ gameId, action, comparisonField, playerId  }) => {
     try {
-      let game;
-      
-      if (action === 'play_round') {
-         console.log('play_action received:', { gameId, action, comparisonField });
-       // console.log('current player stats:', game.players.map(p => ({ id: p.id, handSize: p.hand.length })));
-          game = gameService.playRound(gameId, comparisonField);
-      }
+    if (action === 'play_round') {
+      console.log('play_action received:', { gameId, comparisonField, playerId });
+
+      const game = gameService.playRound(gameId, comparisonField, playerId);
+
       if (!game) {
         socket.emit('error', { message: 'playRound returned no game state' });
         return;
       }
-      console.log('Emitting game state, lastRoundResult:', game?.lastRoundResult);
+
       io.to(gameId).emit('game_state', game);
-    } catch (error) {
-      socket.emit('error', { message: error.message });
+      triggerBotTurnIfNeeded(gameId, io);
     }
-  });
+  } catch (error) {
+    console.error('play_action error:', error);
+    socket.emit('error', { message: error.message });
+  }
+});
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
-    
-    // Clean up game if needed
-   /*  if (socket.gameId) {
-      const game = gameService.getGame(socket.gameId);
-      if (game) {
-        const playerIndex = game.players.findIndex(p => p.socketId === socket.id);
-        if (playerIndex > -1) {
-          game.players.splice(playerIndex, 1);
-          io.to(socket.gameId).emit('game_state', game);
-        }
-      } 
-    }*/
   });
 });
 
@@ -103,4 +107,4 @@ server.listen(3001, () => {
   console.log('Server running on port 3001');
 });
 
-//app.get('/test', (req, res) => res.send('hello world'))
+app.get('/test', (req, res) => res.send('hello world'))

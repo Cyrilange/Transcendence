@@ -1,199 +1,168 @@
-import React, { useState }from 'react';
+import React, { useState, useEffect } from 'react';
 import Typography from '@mui/joy/Typography';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
-
-import Stack from '@mui/joy/Stack'
-
+import Stack from '@mui/joy/Stack';
 import Modal from '@mui/joy/Modal';
 import ModalDialog from '@mui/joy/ModalDialog';
 import ModalClose from '@mui/joy/ModalClose';
-import FormControl from '@mui/joy/FormControl';
-
-import SliderSteps from '../sliders/SliderSteps';
-//import SliderLabel from '../sliders/SliderLabel';
 import Button from '@mui/joy/Button';
 import ToggleButtonGroup from '@mui/joy/ToggleButtonGroup';
 import { FormLabel } from '@mui/joy';
 import Slider from '@mui/joy/Slider';
+import Chip from '@mui/joy/Chip';
 
 const API_URL = 'http://localhost:3001/api/games';
-	const marks = [
-  {
-	value: 2,
-	label: '2',
-  },
-  {
-	value: 3,
-	label: '3',
-  },
-  {
-	value: 4,
-	label: '4',
-  },
-  {
-	value: 5,
-	label: '5',
-  },
 
-];
-function valueText(value) {
-  return `${value}`;
-}
+const difficultyMap = { 1: 'easy', 2: 'medium', 3: 'hard' };
 
-const GameConfig = ({showPopUp, closePopUp, title}) => {
-	const navigate = useNavigate();
-  	const [loading, setLoading] = useState(false);
- 	const [error, setError] = useState(null);
+function valueText(value) { return `${value}`; }
 
-	const handleSubmit = async (e) => {
+// GameConfig now receives slots from Home and derives config from them
+const GameConfig = ({ showPopUp, closePopUp, title, slots = [] }) => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showRounds, setShowRounds] = useState(false);
+  const [roundsNbr, setRoundsNbr] = useState(20);
+
+  // Derived from slots — no manual input needed
+  const playerCount = slots.length + 1; // +1 for the human player
+  const bots = slots.filter(s => s.type === 'bot');
+  const humanPlayers = slots.filter(s => s.type === 'player');
+  const vsComputer = bots.length > 0;
+
+  // For multi-bot games use the highest difficulty among all bots
+  // Individual bot difficulties are already set per-slot in Home
+  const highestDifficulty = bots.length > 0
+    ? Math.max(...bots.map(b => b.difficulty))
+    : 2;
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (showPopUp) {
+      setShowRounds(false);
+      setRoundsNbr(20);
+      setError(null);
+    }
+  }, [showPopUp]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-   // const formData = new FormData(e.target);
     const config = {
-      	playerCount: number,                        
-    	vsComputer: value === 'computer',             
-		rounds: showRounds ? roundsNbr : null,       
-		gameType: showRounds ? 'rounds' : 'endless'  
-	}
-	/* for (var pair of formData.entries()) {
-  	 	 console.log(pair[0]+ ', ' + pair[1]); 
-	} */
-	console.log('Game config being sent:', config);
-	
+      playerCount,
+      vsComputer,
+      rounds: showRounds ? roundsNbr : null,
+      gameType: showRounds ? 'rounds' : 'endless',
+      difficulty: difficultyMap[highestDifficulty],
+      // Pass full bot config for future per-bot difficulty support
+      bots: bots.map(b => ({ difficulty: difficultyMap[b.difficulty] })),
+      humanSlots: humanPlayers.length
+    };
+
+    console.log('Game config being sent:', config);
+
     try {
-      // Axios automatically handles JSON stringification and parsing
       const response = await axios.post(API_URL, config);
-      
-      // Access data directly from response.data
       const { gameId } = response.data;
       navigate(`/game/${gameId}`);
-      
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        // Handle HTTP errors (400, 500, etc.)
         setError(err.response?.data?.error || 'Failed to create game');
       } else {
         setError('Network error. Please check your connection.');
       }
-      console.error("Game creation failed:", err);
+      console.error('Game creation failed:', err);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-	const [showDifficulty, setDifficulty] = useState(false)
-	const [showRounds, setShowRounds] = useState(false)
-	const [value, setValue] = React.useState('player');
-	const [rounds, setRounds] = React.useState('standard'); 
-	const [number, setNumber] = React.useState(2); 
-	const [roundsNbr, setRoundsNbr] = React.useState(20);
-	if (!showPopUp) {return null}
+  if (!showPopUp) return null;
 
-	/* const formData = new FormData(form, submitter);
+  return (
+    <Modal
+      aria-labelledby="Game setup"
+      aria-describedby="A form to configure a game"
+      open={showPopUp}
+      onClose={closePopUp}
+      sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+    >
+      <ModalDialog>
+        <ModalClose />
+        <form onSubmit={handleSubmit}>
+          <Stack direction="column" spacing={1.5}>
+            <Typography color="primary" level="h3">{title}</Typography>
 
-		const output = document.getElementById("output");
+            {/* Summary of what was configured in Home */}
+            <Typography color="neutral" level="h4">Game Summary</Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              <Chip size="sm" variant="soft" color="primary">
+                👥 {playerCount} players
+              </Chip>
+              {bots.map((b, i) => (
+                <Chip key={i} size="sm" variant="soft" color="warning">
+                  🤖 Bot {i + 1} — {difficultyMap[b.difficulty]}
+                </Chip>
+              ))}
+              {humanPlayers.map((_, i) => (
+                <Chip key={i} size="sm" variant="soft" color="success">
+                  👤 Player {i + 2}
+                </Chip>
+              ))}
+            </Stack>
 
-		for (const [key, value] of formData) {
-		output.textContent += `${key}: ${value}\n`;
-		} */
+            {/* Only thing left to configure is game type */}
+            <Typography color="neutral" level="h4">Game Type</Typography>
+            <Stack direction="row">
+              <ToggleButtonGroup
+                variant="outlined"
+                color="primary"
+                value={showRounds ? 'rounds' : 'standard'}
+                onChange={(e, val) => {
+                  if (val !== null) setShowRounds(val === 'rounds');
+                }}
+              >
+                <Button value="standard">Standard</Button>
+                <Button value="rounds">Rounds</Button>
+              </ToggleButtonGroup>
+            </Stack>
 
-	return (
-		<Modal
-		aria-labelledby="Game setup"
-        aria-describedby="A form to configure a game"
-        open={showPopUp}
-        onClose={closePopUp}
-        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-      >	 
-	  <ModalDialog>
-			<ModalClose />
-			<form onSubmit={handleSubmit} >
-			<Stack direction="column" spacing={1.5}>
-				<Typography color='primary' level='h3'> {title}</Typography>
-				<Typography color="neutral" level='h4'>Opponent</Typography>
-					<Stack direction="row">
-						<ToggleButtonGroup variant='outlined' color="primary" 
-							value={value}
-							onChange={(event, newValue) => {
-								setValue(newValue);
-							}}
-							>
-							<Button onClick={()=>setDifficulty(false)} name="player" value="player">Player</Button>
-							<Button onClick={()=>setDifficulty(true)} name="computer" value="computer">Computer</Button>
-							
-						</ToggleButtonGroup>
-					</Stack>
-					<Typography color="neutral" level='h4'>Number of players</Typography>
-					<Slider 
-						id="playerNbr"
-						name="playerNbr"
-						aria-label="Number of players"
-						defaultValue={2}
-						min={2}
-						max={5}
-						step={1}
-						//	getAriaValueText={valueText}
-						valueLabelDisplay="off"
-						value={number}
-						onChange={(event, newNumber) => {
-							setNumber(newNumber);
-						}}
-						marks={marks}
-					/>
-					{/* //<SliderSteps  aria-label="Number of players" /> */}
-					
-					
-					{showDifficulty &&(
-					<FormControl>
-						<Typography color="neutral" level='h4'>Computer Difficulty</Typography>
-						{error && <p style={{color: 'red'}}>{error}</p>}
-						<SliderSteps name="difficulty" aria-label="Computer difficulty" />
-					</FormControl>
-					)}
-					<Typography color="neutral" level='h4'>Game type</Typography>
-					<Stack direction="row">
-						<ToggleButtonGroup variant='outlined' color="primary" 
-						value={rounds}
-						onChange={(event) => {
-							setRounds(event.target.value);
-						}}
-						>
-						<Button onClick={()=>setShowRounds(false)} name="standard" value="standard" >Standard</Button>
-						<Button onClick={()=>setShowRounds(true)} name="rounds" value="rounds" >Rounds</Button>
-						
-						</ToggleButtonGroup>
-						</Stack>
-					{showRounds &&(
-					<div>
-					{/* 	<Typography color="neutral" level='h4'>Number of rounds</Typography> */}
-						<FormLabel>Number of rounds</FormLabel>
-						    <Slider
-								id="roundsNbr"
-								name="roundsNbr" 
-								value={roundsNbr}
-								aria-label="Custom marks"
-								defaultValue={20}
-								min={10}
-								max={30}
-								step={1}
-								getAriaValueText={valueText}
-								valueLabelDisplay="true"
-								onChange={(event, newRoundsNbr) => {
-									setRoundsNbr(newRoundsNbr);
-							}}
-						/>
-					</div>
-					)}
-					<Button sx={{marginTop: '15px'}} type="submit" variant="solid" disabled={loading}>  {loading ? 'Creating...' : 'Start Game'}</Button>				
-				</Stack>
-				</form>
-			</ModalDialog>
-		</Modal>
-		)
+            {showRounds && (
+              <div>
+                <FormLabel>Number of rounds</FormLabel>
+                <Slider
+                  value={roundsNbr}
+                  aria-label="Number of rounds"
+                  defaultValue={20}
+                  min={10}
+                  max={30}
+                  step={1}
+                  getAriaValueText={valueText}
+                  valueLabelDisplay="on"
+                  onChange={(e, val) => setRoundsNbr(val)}
+                />
+              </div>
+            )}
+
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
+            <Button
+              sx={{ marginTop: '15px' }}
+              type="submit"
+              variant="solid"
+              disabled={loading}
+            >
+              {loading ? 'Creating...' : 'Start Game'}
+            </Button>
+          </Stack>
+        </form>
+      </ModalDialog>
+    </Modal>
+  );
 };
 
 export default GameConfig;

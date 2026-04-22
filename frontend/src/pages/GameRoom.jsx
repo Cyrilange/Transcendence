@@ -43,7 +43,7 @@ const GameRoom = () => {
         window.location.href = '/';
   };
   useEffect(() => {
-    const socket = io('http://localhost:3001');
+    const socket = io('http://localhost:3001'); //should be variable to out network
     socketRef.current = socket;
     
    socket.on('connect', () => {
@@ -99,14 +99,17 @@ const GameRoom = () => {
     /*  if (socketRef.current?.connected) {
       socketRef.current.emit('play_action', { gameId, action: 'play_round', comparisonField });
     } */
+    const game = gameState;
+    if (game.activePlayerId !== localPlayerId) return; // guard — not your turn
     
     console.log('Emitting play_action for gameId:', gameId);
-    if (socketRef.current) {
+    if (socketRef.current?.connected) {
       console.log('Socket connected:', socketRef.current.connected);
       socketRef.current.emit('play_action', {
         gameId,
         action: 'play_round',
-        comparisonField
+        comparisonField,
+        playerId: localPlayerId
       });
     } else {
     console.log('No socket ref!');
@@ -117,6 +120,10 @@ const GameRoom = () => {
   if (!gameState) return <div>Loading Game State...</div>;
   
   const localPlayerId = 'player_1';
+  const isMyTurn = gameState.activePlayerId === localPlayerId;
+  const isBotThinking = !isMyTurn && gameState.players.find(
+    p => p.id === gameState.activePlayerId
+  )?.isBot;
 
   //const [gameWinner, setGameWinner] = useState(null);
 
@@ -143,7 +150,14 @@ const GameRoom = () => {
           {roundMessage.text}
         </GameAlert>
       )}
-
+       <p style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                {isBotThinking
+                  ? `🤖 ${gameState.activePlayerId} is thinking...`
+                  : isMyTurn
+                  ? '🟢 Your turn — pick a stat!'
+                  : `⏳ Waiting for ${gameState.activePlayerId}...`
+                }
+              </p>
       <Stack direction="row" spacing={2} justifyContent="center">
       {gameState.players
         .filter(player => player && player.hand && player.hand.length > 0)
@@ -154,7 +168,8 @@ const GameRoom = () => {
           if (!topCard) return null;
 
           return (
-            <div key={player.id}>
+            <div key={player.id } style={{ opacity: isMyTurn ? 1 : 0.5, transition: 'opacity 0.3s' }}>
+             
               {isLocal && hasCards ? (
               <Badge
                   badgeContent={player.hand.length}
@@ -169,8 +184,7 @@ const GameRoom = () => {
                   pool_month={topCard.pool_month}
                   pool_year={topCard.pool_year}
                   url={topCard.image?.versions?.small}
-                  // Only player_1 has interactive buttons for now
-                  onPlayStat={handlePlayRound}
+                  onPlayStat={isMyTurn ? handlePlayRound : null}
                 />
                 </Badge>
               ) : (

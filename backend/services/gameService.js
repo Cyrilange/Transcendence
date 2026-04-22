@@ -1,6 +1,7 @@
 // server/services/gameService.js
 const  fs = require('fs')
 const  path = require('path')
+const apiService = require('../callApi.js');
 //import { fileURLToPath } from 'url'; // 1. Import this helper
 
 // 2. Define __dirname and __filename manually
@@ -11,8 +12,37 @@ class GameService {
   constructor() {
     this.games = {};
     this.userJsonPath = path.join(__dirname, '../data/user.json');
-      console.log('GameService instance created'); // ← add this
+      console.log('GameService instance created');
   }
+
+  getBotChoice(card, difficulty) {
+  const stats = {
+    wallet: card.wallet ?? 0,
+    correction_point: card.correction_point ?? 0,
+    // startDate is better at lower values so invert it for comparison
+    startDate: card.startDate ? (999999 - card.startDate) : 0
+  };
+
+  const statNames = Object.keys(stats);
+
+  if (difficulty === 'easy') {
+    // Easy — pick a random stat
+    return statNames[Math.floor(Math.random() * statNames.length)];
+  }
+
+  if (difficulty === 'medium') {
+    // Medium — pick strongest stat 60% of the time, random 40%
+    // Medium — pick strongest stat 60% of the time, random 40%
+    if (Math.random() < 0.6) {
+      return statNames.reduce((a, b) => stats[a] >= stats[b] ? a : b);
+    }
+    return statNames[Math.floor(Math.random() * statNames.length)];
+  }
+
+  // Hard — always pick the strongest stat
+  return statNames.reduce((a, b) => stats[a] >= stats[b] ? a : b);
+}
+
   parseStartDate(month, year) {
     if (!year) return null;
     const monthMap = {
@@ -27,10 +57,9 @@ class GameService {
     return y * 100 + m;
   }
   // Load and parse user.json with proper types
-  loadUserDeck() {
+  async loadUserDeck() {
     try {
-      const rawData = fs.readFileSync(this.userJsonPath, 'utf8');
-      const users = JSON.parse(rawData);
+     const users = await apiService.fetchUsers();
       
       return users.map(user => ({
         ...user,
@@ -45,10 +74,28 @@ class GameService {
       }));
     } catch (error) {
       console.error('Error loading user.json:', error);
-      return [];
+      return this.loadLocalDeck();
     }
   }
-
+  
+  loadLocalDeck() {
+  try {
+    const rawData = fs.readFileSync(this.userJsonPath, 'utf8');
+    const users = JSON.parse(rawData);
+    return users.map(user => ({
+      ...user,
+      points: parseInt(user.points, 10) || 0,
+      wallet: parseInt(user.wallet, 10) || 0,
+      correction_point: parseInt(user.correction_point, 10) || 0,
+      pool_month: user.pool_month || null,
+      pool_year: user.pool_year || null,
+      startDate: this.parseStartDate(user.pool_month, user.pool_year)
+    }));
+  } catch (error) {
+    console.error('Error loading local deck:', error);
+    return [];
+  }
+  }
   // Parse dates safely
   parseDate(dateString) {
     if (!dateString) return null;
@@ -88,9 +135,10 @@ class GameService {
 //Error: Cannot read properties of undefined (reading 'hand')
 //Error: Cannot read properties of undefined (reading 'id')
   // Create new game
-  createGame(gameId, playerCount, vsComputer, rounds, gameType = 'endless') {
+ async createGame(gameId, playerCount, vsComputer, rounds, gameType = 'endless', difficulty = 'medium') {
      console.log('createGame called with:', { gameId, playerCount, vsComputer, rounds, gameType });
-    const deck = this.loadUserDeck();
+     const deck = await this.loadUserDeck(); 
+ //    const deck = this.loadUserDeck();
     const shuffledDeck = this.shuffleDeck(deck);
 
     // Create playerCount placeholder players
@@ -99,9 +147,12 @@ class GameService {
       name: `Player ${i + 1}`,
       hand: [],
       roundWins: 0,
-      socketId: null // To track who is connected
+      socketId: null, // To track who is connected
+      isBot: vsComputer && i !== 0  // player_1 is always human, rest are bots if vsComputer
     }));
     this.dealHands(players, shuffledDeck, playerCount);
+
+    const activePlayerId = vsComputer ? 'player_1' : players[Math.floor(Math.random() * playerCount)].id;
 
     const gameState = {
       id: gameId,
@@ -111,6 +162,7 @@ class GameService {
       players,
       deck: shuffledDeck,
       pile: [],  
+      activePlayerId,   // player that picks card
       currentRound: 0,
       roundWinners: [],
       winner: null,
@@ -179,22 +231,31 @@ class GameService {
     return values[comparisonField];
   }
 
-  playRound(gameId, comparisonField = 'correction_point') {
+  playRound(gameId, comparisonField, requestingPlayerId) {
+    const game = this.games[gameId];
     console.log('playRound called, known gameIds:', Object.keys(this.games));
     console.log('looking for:', gameId);
     console.log('found:', !!this.games[gameId]);
-      const game = this.games[gameId];
+    //const game = this.games[gameId];
 
     if (!game || game.status !== 'playing') {
-      throw new Error('Game not ready to play');
+       throw new Error('Game not ready to play');
     }
-
+    if (requestingPlayerId && game.activePlayerId !== requestingPlayerId) {
+      throw new Error('It is not your turn to pick');
+    }
     // Get the top card of each player
     const activePlayers = game.players.filter(p => p.hand.length > 0);
-
     if (activePlayers.length < 2) {
       //we have a winner !!!!
       throw new Error('Not enough players with cards');
+    }
+     // If active player is a bot, override comparisonField with bot's choice
+    const activePlayer = game.players.find(p => p.id === game.activePlayerId);
+    if (activePlayer?.isBot) {
+      const difficulty = game.config.difficulty || 'hard';
+      comparisonField = this.getBotChoice(activePlayer.hand[0], difficulty);
+      console.log(`Bot (${activePlayer.id}) chose: ${comparisonField}`);
     }
     // Step 1: check top cards 
     const topCards = activePlayers.map(p => ({
@@ -261,7 +322,9 @@ class GameService {
         winningCard: winingCard
       };
     }
-    
+    if (winners.length === 1) {
+       game.activePlayerId = winners[0].player.id;
+    }
     console.log('About to return game:', game ? 'exists' : 'undefined');
     console.log('Game keys:', Object.keys(game));
     const activeAfter = game.players.filter(p => p.hand.length > 0);

@@ -14,10 +14,10 @@ import GameRoom from './pages/GameRoom.jsx'
 
 
 
-function Header(){
+function Header(){ //can be done as component and make them stack row add sticky
 	return(
 		<nav className='Header'>
-        <Link to="/">logo</Link>
+        <Link to="/">42SuperTrump</Link>
         <Menu />
     </nav>
 	)
@@ -53,7 +53,7 @@ function App() {
               <Route path="/privacy-policy" element={<DataPolicy />} />
               <Route path="/terms-of-service" element={<Imprint />} />
               <Route path="/profile" element={<GameRoom />} />
-              <Route path="/game/:gameId" element={<GameRoom />} />
+              <Route path="/game/:gameId" element={<GameRoom />} /> 
           </Routes>
             <Footer />
         </Sheet>

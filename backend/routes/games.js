@@ -1,21 +1,23 @@
 const express =  require('express')
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
+//const axios = require('axios');
 const gameService = require('../services/gameService.js')
+//const apiService = require('../callApi.js');
 
 module.exports = (io) => {
 
   // Create game
   router.post('/', async (req, res) => {
     try {
-      const { playerCount, vsComputer, rounds, gameType } = req.body;
+      const { playerCount, vsComputer, rounds, gameType, difficulty  } = req.body;
 
       if (!playerCount || playerCount < 2 || playerCount > 4) {
         return res.status(400).json({ error: 'Invalid player count' });
       }
 
       const gameId = uuidv4();
-      const gameState = gameService.createGame(gameId, playerCount, vsComputer, rounds, gameType);
+      const gameState =  await gameService.createGame(gameId, playerCount, vsComputer, rounds, gameType, difficulty );
 
       console.log('Game created:', { gameId, playerCount, vsComputer, rounds, gameType });
 
@@ -25,7 +27,26 @@ module.exports = (io) => {
       res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
+/*   //just to see our campus id
+  router.get('/campuses', async (req, res) => {
+    try {
+      const token = await apiService.getToken();
+      const response = await axios.get(`${process.env.FORTY_TWO_API_URL}/v2/campus/37/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { 'page[size]': 100 }
+      });
 
+      // Log to server terminal for easy reading
+      console.log('Campuses:');
+      response.data.forEach(c => console.log(`  ${c.id} — ${c.name} (${c.country})`));
+
+      res.json(response.data);
+    } catch (error) {
+      console.error('Campus fetch error:', error.message);
+      res.status(500).json({ error: error.message });
+    }
+  });
+ */
   // Join game
   router.post('/:gameId/join', async (req, res) => {
     try {

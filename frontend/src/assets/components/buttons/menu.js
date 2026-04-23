@@ -20,8 +20,8 @@ export default function ControlledDropdown() {
       <MenuButton>Menu</MenuButton>
 
       <Menu>
-        <MenuItem component={Link} to="/profile">
-          Profile
+        <MenuItem component={Link} to="/">
+          Home
         </MenuItem>
 
         <MenuItem onClick={handleLogout}>

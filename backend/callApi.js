@@ -19,6 +19,7 @@ class ApiService {
     this.token = null;
     this.tokenExpiry = null;
     this.baseUrl = process.env.FORTY_TWO_API_URL;
+    console.log("BASE URL =", this.baseUrl);
   }
 
   // Get or refresh OAuth token
@@ -27,11 +28,14 @@ class ApiService {
       return this.token;
     }
 
-    const response = await axios.post(`${this.baseUrl}/oauth/token`, {
-      grant_type: 'client_credentials',
-      client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET
-    });
+    const response = await axios.post(
+      `${this.baseUrl}/oauth/token`,
+      new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: process.env.CLIENT_ID,
+        client_secret: process.env.CLIENT_SECRET
+      })
+    );
 
     this.token = response.data.access_token;
     // Token expires in 7200s — store expiry with 60s buffer
@@ -67,8 +71,9 @@ class ApiService {
 
   // Pick 10 random users from each page
   const cardsPerPage = Math.floor(totalCards / pages.length);
-  const selected = pages.flatMap(users => {
-    const shuffled = [...users].sort(() => Math.random() - 0.5);
+  const selected = pages.flatMap(page => {
+    const list = Array.isArray(page) ? page : [];
+    const shuffled = [...list].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, cardsPerPage);
   });
 

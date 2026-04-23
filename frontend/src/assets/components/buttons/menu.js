@@ -3,23 +3,30 @@ import Dropdown from '@mui/joy/Dropdown';
 import Menu from '@mui/joy/Menu';
 import MenuButton from '@mui/joy/MenuButton';
 import MenuItem from '@mui/joy/MenuItem';
-import {Link} from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function ControlledDropdown() {
   const [open, setOpen] = React.useState(false);
+  const navigate = useNavigate();
 
-  const handleOpenChange = React.useCallback((event, isOpen) => {
-    setOpen(isOpen);
-  }, []);
+  const handleLogout = async () => {
+    await axios.post('/auth/logout', {}, { withCredentials: true });
+    navigate('/');
+  };
 
   return (
-    <Dropdown open={open} onOpenChange={handleOpenChange}>
-		{/* Add image icon for user as menu */}
-      <MenuButton>Menu</MenuButton> 
+    <Dropdown open={open} onOpenChange={(e, isOpen) => setOpen(isOpen)}>
+      <MenuButton>Menu</MenuButton>
+
       <Menu>
-        <MenuItem component={Link} to="/profile">Profile</MenuItem>
-        <MenuItem>Logout</MenuItem>
+        <MenuItem component={Link} to="/profile">
+          Profile
+        </MenuItem>
+
+        <MenuItem onClick={handleLogout}>
+          Logout
+        </MenuItem>
       </Menu>
     </Dropdown>
   );

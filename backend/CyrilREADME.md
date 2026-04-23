@@ -22,30 +22,30 @@ node server.js
 Server runs on: (for now ) 
 
 ```
-http://localhost:3000
+http://localhost:3001
 ```
 
 ---
 
 ## test 
 
-curl http://localhost:3000/test
+curl http://localhost:3001/test
 
 ## test db 
 
-curl http://localhost:3000/db-test
+curl http://localhost:3001/db-test
 
 ## login
 
-http://localhost:3000/login 
+http://localhost:3001/login 
 
 ## check our log
 
-http://localhost:3000/user/check 
+http://localhost:3001/user/check 
 
 ## log out
 
-http://localhost:3000/logout 
+http://localhost:3001/logout 
 
 ## dependencies
 _npm install express axios body-parser dotenv_ for API42  

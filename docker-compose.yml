@@ -2,9 +2,17 @@ services:
   backend:
     build: ./backend
     volumes:
-      - ${HOME}/data/sqlite
+      - ${HOME}/data/sqlite:/data/sqlite
     env_file:
       - ./backend/.env
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - backend
     restart: unless-stopped
 
   nginx:
@@ -17,4 +25,5 @@ services:
       - ./nginx/certs:/etc/nginx/certs
     depends_on:
       - backend
+      - frontend
     restart: unless-stopped

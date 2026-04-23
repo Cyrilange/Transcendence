@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import '../assets/styles/style.css';
 import GameConfig from '../assets/components/popups/GameConfig';
 import Register from '../assets/components/popups/Register';
@@ -8,15 +9,29 @@ import { PhantomCard, FilledSlot } from '../assets/components/cards/PlayerSlot';
 import Button from '@mui/joy/Button';
 import Stack from '@mui/joy/Stack';
 
-const MAX_OPPONENTS = 3; // max 4 players total including the user
+const MAX_OPPONENTS = 3;
 
 function Home() {
   const [showPopUp, setShowPopUp] = useState(false);
   const [showRegister, setRegister] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-
-  // Each slot: { type: 'bot' | 'player', difficulty: 1|2|3 }
+  const [user, setUser] = useState(null); // null = not logged in
   const [slots, setSlots] = useState([]);
+
+  // Check existing session on mount
+  useEffect(() => {
+    axios.get('/auth/me', { withCredentials: true })
+      .then(res => setUser(res.data))
+      .catch(() => setUser(null));
+  }, []);
+
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setSlots([]);
+  };
 
   const handleAddSlot = () => {
     if (slots.length >= MAX_OPPONENTS) return;
@@ -29,9 +44,7 @@ function Home() {
 
   const handleToggleType = (index) => {
     setSlots(prev => prev.map((slot, i) =>
-      i === index
-        ? { ...slot, type: slot.type === 'bot' ? 'player' : 'bot' }
-        : slot
+      i === index ? { ...slot, type: slot.type === 'bot' ? 'player' : 'bot' } : slot
     ));
   };
 
@@ -45,20 +58,16 @@ function Home() {
   const showPhantom = slots.length < MAX_OPPONENTS;
 
   return (
-    <div style={{height: '100vh'}}>
+    <div style={{ height: '100vh' }}>
       <div>
-        {isLoggedIn ? (
+        {user ? (
           <Stack direction="column" alignItems="center" spacing={3}>
-
-            {/* Card row — profile + opponent slots + phantom */}
             <div
               className="player-row"
-              style={{ display: 'flex', flexDirection: 'row', gap: '16px', alignItems: 'flex-start',  justifyContent: 'center', transition: 'all 0.3s ease' }}
+              style={{ display: 'flex', flexDirection: 'row', gap: '16px', alignItems: 'flex-start', justifyContent: 'center', transition: 'all 0.3s ease' }}
             >
-              {/* User's own profile card */}
-              <ProfileCard onLogout={() => setIsLoggedIn(false)} />
+              <ProfileCard user={user} onLogout={handleLogout} />
 
-              {/* Filled opponent slots */}
               {slots.map((slot, index) => (
                 <FilledSlot
                   key={index}
@@ -69,19 +78,12 @@ function Home() {
                 />
               ))}
 
-              {/* Phantom card — visible on row hover if under max */}
               {showPhantom && <PhantomCard onClick={handleAddSlot} />}
             </div>
 
-            {/* Create game button — only show when opponents added */}
             {hasOpponents && (
               <Stack direction="column" alignItems="center" spacing={2}>
-                <Button
-                  variant="solid"
-                  size="lg"
-                  color="primary"
-                  onClick={() => setShowPopUp(true)}
-                >
+                <Button variant="solid" size="lg" color="primary" onClick={() => setShowPopUp(true)}>
                   Create Game
                 </Button>
                 <GameConfig
@@ -93,35 +95,22 @@ function Home() {
               </Stack>
             )}
 
-            {/* Join game button — show when no opponents added yet */}
             {!hasOpponents && (
-              <Button
-                variant="outlined"
-                size="lg"
-                onClick={() => alert('Join game — coming soon')}
-              >
+              <Button variant="outlined" size="lg" onClick={() => alert('Join game — coming soon')}>
                 Join Game
               </Button>
             )}
-
           </Stack>
         ) : (
           <Stack direction="column" alignItems="center" spacing={2}>
             <Button variant="outlined" size="lg" onClick={() => setRegister(true)}>
-              Login
+              Login / Register
             </Button>
             <Register
               showPopUp={showRegister}
               closePopUp={() => setRegister(false)}
-              title="Sign up"
-            />
-          {/*   <Button variant="outlined" size="lg" onClick={() => setShowPopUp(true)}>
-              Start a game
-            </Button> */}
-            <GameConfig
-              showPopUp={showPopUp}
-              closePopUp={() => setShowPopUp(false)}
-              title="New game"
+              title="Welcome"
+              onLoginSuccess={handleLoginSuccess}
             />
           </Stack>
         )}

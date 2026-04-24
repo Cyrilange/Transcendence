@@ -6,6 +6,7 @@ import Stack from '@mui/joy/Stack';
 import Badge from '@mui/joy/Badge';
 import Button from '@mui/joy/Button';
 import GameAlert from '../assets/components/popups/GameAlert';
+import axios from 'axios';
 
 const BlankCard = ({ playerId, handSize }) => (
   <div style={{
@@ -33,6 +34,7 @@ const GameRoom = () => {
   const [status, setStatus] = useState('Connecting...');
   const [roundMessage, setRoundMessage] = useState(null);
   const [gameOver, setGameOver] = useState(null);
+  const [localPlayerId, setLocalPlayerId] = useState(null);
   const socketRef = useRef(null);
 
   const handlePlayAgain = () => {
@@ -43,8 +45,18 @@ const GameRoom = () => {
     const socket = io('/', { path: '/socket.io', withCredentials: true });
     socketRef.current = socket;
 
-    socket.on('connect', () => {
-      socket.emit('join_game', gameId);
+    socket.on('connect', async () => {
+      try {
+        const res = await axios.get('/auth/me', { withCredentials: true });
+        socket.emit('join_game', { gameId, login: res.data.login });
+      } catch {
+        socket.emit('join_game', { gameId, login: null });
+      }
+    });
+
+    // Server tells us which player slot we were assigned
+    socket.on('player_assigned', ({ playerId }) => {
+      setLocalPlayerId(playerId);
     });
 
     socket.on('game_state', (state) => {
@@ -84,14 +96,15 @@ const GameRoom = () => {
 
     return () => {
       socket.off('game_state');
+      socket.off('player_assigned');
       socket.off('error');
       socket.disconnect();
     };
   }, [gameId]);
 
   const handlePlayRound = (comparisonField) => {
-    const game = gameState;
-    if (game.activePlayerId !== localPlayerId) return;
+    if (!localPlayerId) return;
+    if (gameState.activePlayerId !== localPlayerId) return;
 
     if (socketRef.current?.connected) {
       socketRef.current.emit('play_action', {
@@ -105,8 +118,8 @@ const GameRoom = () => {
 
   if (status.includes('Error')) return <div>{status}</div>;
   if (!gameState) return <div>Loading Game State...</div>;
+  if (!localPlayerId) return <div>Joining game...</div>;
 
-  const localPlayerId = 'player_1';
   const isMyTurn = gameState.activePlayerId === localPlayerId;
   const isBotThinking = !isMyTurn && gameState.players.find(
     p => p.id === gameState.activePlayerId
@@ -117,10 +130,18 @@ const GameRoom = () => {
       <Stack direction="row" justifyContent="space-around">
         <p>Status: {gameState.status}</p>
         <p>Players: {gameState.players.length} / {gameState.config.playerCount}</p>
+        <p>You are: <strong>{localPlayerId}</strong></p>
       </Stack>
 
       <p>Round: {gameState.currentRound} {gameState.config.gameType === 'rounds' ? `/ ${gameState.config.rounds}` : ''}</p>
       <p>Pile: {gameState.pile?.length ?? 0} cards</p>
+
+      {/* Share link for human players */}
+      {gameState.config.playerCount > 1 && !gameState.config.vsComputer && (
+        <p style={{ textAlign: 'center', fontSize: '0.85rem', opacity: 0.7 }}>
+          Share this link: <strong>{window.location.href}</strong>
+        </p>
+      )}
 
       {roundMessage && (
         <GameAlert

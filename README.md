@@ -1,3 +1,54 @@
+# DESCRIPTION
+
+
+### Team Information
+csalamit : 
+
+
+### Project Management:
+
+### Technical Stack:
+frontend : mui / react and axios for api
+backend : express , node.js
+container : docker and docker compose
+nginx for https
+
+### Database Schema
+
+
+
+The application uses a single SQLite database (`data/transcendence.db`).
+
+#### Table: `users`
+
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique user identifier |
+| `login` | TEXT | UNIQUE, NOT NULL | 42 login or chosen username |
+| `email` | TEXT | UNIQUE | User email address |
+| `password_hash` | TEXT | nullable | bcrypt hash (null for OAuth 42 users) |
+| `avatar` | TEXT | nullable | URL to user avatar image |
+| `wins` | INTEGER | DEFAULT 0 | Number of games won |
+| `losses` | INTEGER | DEFAULT 0 | Number of games lost |
+| `created_at` | DATETIME | DEFAULT CURRENT_TIMESTAMP | Account creation date |
+
+#### Notes
+
+- Users authenticated via **OAuth 42** have `password_hash = NULL` and their avatar is fetched from the 42 API.
+- Users authenticated via **email/password** have their password stored as a **salted bcrypt hash** (cost factor 12).
+- Game state is stored **in memory** during a session and is not persisted to the database.
+
+# INSTRUCTIONS
+
+# RULES OF THE GAME 
+
+
+
+# FRONTEND 
+
+
+# BACKEND
+
 ## backend with node.js using express as a framework
  _npm install express --save_
 
@@ -192,16 +243,6 @@ GET    /matchmaking/status
 
 ---
 
-##  Next Steps
-
-* Add database (PostgreSQL / Prisma)
-* Implement full OAuth (login with 42)
-* Add game persistence
-* Implement real-time gameplay with Socket.io
-* Add matchmaking system
-
----
-
 ##  Author
 
 Backend development for Transcendence project.
@@ -210,3 +251,7 @@ mkcert -install
 mkcert localhost 127.0.0.1
 mv localhost+1.pem ~/Transcendence/nginx/certs/cert.pem
 mv localhost+1-key.pem ~/Transcendence/nginx/certs/key.pem
+
+
+
+# RESSOURCE

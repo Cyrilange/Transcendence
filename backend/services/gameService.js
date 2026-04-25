@@ -85,7 +85,8 @@ class GameService {
   }
 
   dealHands(players, deck) {
-    const perPlayer = Math.floor(deck.length / players.length);
+    //const perPlayer = Math.floor(deck.length / players.length);
+    const perPlayer = 30;
     players.forEach((p, i) => {
       p.hand = deck.slice(i * perPlayer, (i + 1) * perPlayer).map(card => ({
         ...card,
@@ -101,7 +102,7 @@ class GameService {
     const deck = await this.loadUserDeck();
     const shuffled = this.shuffleDeck(deck);
 
-    const needed = playerCount * 10;
+    const needed = playerCount * 30;
     console.log("DECK LENGTH =", shuffled.length, "NEEDED =", needed);
     if (shuffled.length < needed)
       throw new Error('Not enough cards in deck');

@@ -1,7 +1,6 @@
 const axios = require('axios')
 const { getToken } = require('./auth')
 
-
 async function getUser(login) {
   const token = await getToken()
   try {
@@ -22,7 +21,6 @@ class ApiService {
     console.log("BASE URL =", this.baseUrl);
   }
 
-  // Get or refresh OAuth token
   async getToken() {
     if (this.token && this.tokenExpiry > Date.now()) {
       return this.token;
@@ -38,49 +36,44 @@ class ApiService {
     );
 
     this.token = response.data.access_token;
-    // Token expires in 7200s — store expiry with 60s buffer
     this.tokenExpiry = Date.now() + (response.data.expires_in - 60) * 1000;
 
     return this.token;
   }
 
-  // Fetch users from a specific campus
-  async fetchUsers(totalCards = 30, campusId = 37) {
+  async fetchUsers(totalCards = 150, campusId = 37) {
     const token = await this.getToken();
 
-   // Pick 3 random page numbers spread across the user base
     const pageNumbers = [];
-    while (pageNumbers.length < 3) {
-      const page = Math.floor(Math.random() * 20) + 1; // pages 1-20
+    while (pageNumbers.length < 5) {
+      const page = Math.floor(Math.random() * 15) + 1;
       if (!pageNumbers.includes(page)) pageNumbers.push(page);
     }
-  console.log('Fetching pages:', pageNumbers);
-  // Fetch all 3 pages in parallel
-  const pages = await Promise.all(
-    pageNumbers.map(pageNum =>
-      axios.get(`${this.baseUrl}/v2/campus/${campusId}/users`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: {
-          'page[size]': 50,
-          'page[number]': pageNum,
-          'filter[kind]': 'student'
-        }
-      }).then(r => r.data)
-    )
-  );
 
-  // Pick 10 random users from each page
-  const cardsPerPage = Math.floor(totalCards / pages.length);
-  const selected = pages.flatMap(page => {
-    const list = Array.isArray(page) ? page : [];
-    const shuffled = [...list].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, cardsPerPage);
-  });
+    console.log('Fetching pages:', pageNumbers);
 
-  console.log(`Collected ${selected.length} users from ${pages.length} pages`);
-  return selected;
+    const pages = await Promise.all(
+      pageNumbers.map(pageNum =>
+        axios.get(`${this.baseUrl}/v2/campus/${campusId}/users`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            'page[size]': 50,
+            'page[number]': pageNum,
+            'filter[kind]': 'student'
+          }
+        }).then(r => Array.isArray(r.data) ? r.data : [])
+          .catch(() => [])
+      )
+    );
+
+    const allUsers = pages.flat();
+    const unique = [...new Map(allUsers.map(u => [u.id, u])).values()];
+    const shuffled = [...unique].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, totalCards);
+
+    console.log(`Collected ${selected.length} users from ${pages.length} pages`);
+    return selected;
   }
-    
 }
 
 module.exports = new ApiService();

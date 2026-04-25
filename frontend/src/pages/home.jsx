@@ -79,7 +79,7 @@ function Home() {
             className="player-row"
             style={{ display: 'flex', flexDirection: 'row', gap: '16px', alignItems: 'flex-start', justifyContent: 'center', transition: 'all 0.3s ease' }}
           >
-            <ProfileCard user={user} onLogout={handleLogout} />
+            <ProfileCard user={user}  onLogout={handleLogout}  onUpdate={(updatedUser) => setUser(updatedUser)}/>
 
             {slots.map((slot, index) => (
               <FilledSlot

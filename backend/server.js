@@ -27,7 +27,7 @@ const CORS_ORIGINS = [
  
 app.use(cors({
   origin: CORS_ORIGINS,
-  methods: ["GET", "POST"],
+  methods: ["GET", "POST", "PUT"],
   credentials: true
 }));
  
@@ -55,6 +55,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/db', dbRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/games', require('./routes/games')(io));
+
  
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });

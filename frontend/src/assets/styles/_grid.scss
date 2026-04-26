@@ -1,0 +1,36 @@
+
+@media (min-width: 200px) {
+	/* The grid system goes here... */
+	.grid{
+		height: 100vh;
+		padding: 8px;
+		display: grid;
+		grid-template-columns: 1fr;
+		grid-template-rows: 1fr 6fr 1fr; 
+		grid-column-gap: 0.75px;
+		grid-row-gap: 0.45px;
+		}
+
+		.grid-center{ 
+			align-self: center;
+			grid-area: 2 / 1 / 3 / 2;
+		}
+
+}
+@media (min-width: 30em) {
+	.grid{
+	
+		//width: 100vw;
+		grid-template-columns: 1fr 3fr 1fr;
+		grid-template-rows: 1fr 5fr 1fr;
+		grid-column-gap: 0.75px;
+		grid-row-gap: 0.45px;
+	}
+
+	.grid-center{ 
+		grid-area: 2 / 2 / 3 / 3;
+		align-self: center;
+		max-width: 600px !important;
+    	place-self: anchor-center;
+	}
+}

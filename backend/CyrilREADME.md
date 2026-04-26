@@ -22,30 +22,35 @@ node server.js
 Server runs on: (for now ) 
 
 ```
-http://localhost:3000
+http://localhost:3001
 ```
 
 ---
 
 ## test 
 
-curl http://localhost:3000/test
+curl http://localhost:3001/test
 
 ## test db 
 
-curl http://localhost:3000/db-test
+curl http://localhost:3001/db-test
+curl -k https://100.115.92.202/api/db/test
+curl -k [https://ip]/api/db/test
 
 ## login
 
-http://localhost:3000/login 
+http://localhost:3001/login 
+
+ex : 
+[{"id":1,"login":"csalamit","email":"csalamit@student.42malaga.com","avatar":"https://cdn.intra.42.fr/users/e055434fffd508090707832514056f61/csalamit.jpg","wins":0,"losses":2,"created_at":"2026-04-24 11:39:13","password_hash":null}]
 
 ## check our log
 
-http://localhost:3000/user/check 
+http://localhost:3001/user/check 
 
 ## log out
 
-http://localhost:3000/logout 
+http://localhost:3001/logout 
 
 ## dependencies
 _npm install express axios body-parser dotenv_ for API42  

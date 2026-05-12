@@ -27,11 +27,14 @@ function Home() {
   const [user, setUser] = useState(null);
   const [slots, setSlots] = useState([]);
 
-  useEffect(() => {
-    axios.get('/auth/me', { withCredentials: true })
-      .then(res => setUser(res.data))
-      .catch(() => setUser(null));
-  }, []);
+ const refreshUser = async () => {
+  const res = await axios.get('/auth/me', { withCredentials: true });
+  setUser(res.data);
+};
+
+useEffect(() => {
+  refreshUser();
+}, []);
 
   const handleLoginSuccess = (userData) => setUser(userData);
   const handleLogout = () => { setUser(null); setSlots([]); };
@@ -90,7 +93,7 @@ function Home() {
             boxSizing: 'border-box',
           }}
         >
-            <ProfileCard user={user}  onLogout={handleLogout}  onUpdate={(updatedUser) => setUser(updatedUser)}/>
+            <ProfileCard user={user} onLogout={handleLogout} onUpdate={(updatedUser) => setUser(updatedUser)} onRefresh={refreshUser} />
 
             {slots.map((slot, index) => (
               <FilledSlot

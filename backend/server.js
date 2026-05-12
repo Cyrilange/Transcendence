@@ -67,6 +67,7 @@ function updateStats(game) {
     if (game.winners && game.winners.length > 1) return;
     const winnerId = game.winner?.id;
     game.players.filter(p => !p.isBot).forEach(player => {
+      console.log('=== player login:', player.login, '| winnerId:', winnerId, '| player.id:', player.id);
       if (player.id === winnerId) {
         db.prepare('UPDATE users SET wins = wins + 1 WHERE login = ?').run(player.login);
       } else {

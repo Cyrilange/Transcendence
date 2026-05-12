@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Card from '@mui/joy/Card';
 import CardContent from '@mui/joy/CardContent';
 import CardActions from '@mui/joy/CardActions';
@@ -7,7 +7,14 @@ import Input from '@mui/joy/Input';
 import axios from 'axios';
 import defaultAvatar from '../../Image/loginSmall.png';
 
-const ProfileCard = ({ user, onLogout, onUpdate }) => {
+const ProfileCard = ({ user, onLogout, onUpdate, onRefresh }) => {
+  
+  useEffect(() => {
+    window.addEventListener('focus', onRefresh);
+    return () => window.removeEventListener('focus', onRefresh);
+  }, [onRefresh]);
+
+
   const [editing, setEditing] = useState(false);
   const [newLogin, setNewLogin] = useState(user.login);
   const [error, setError] = useState(null);

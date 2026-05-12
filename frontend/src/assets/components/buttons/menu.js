@@ -13,6 +13,7 @@ export default function ControlledDropdown() {
   const handleLogout = async () => {
     await axios.post('/auth/logout', {}, { withCredentials: true });
     navigate('/');
+    window.location.reload();
   };
 
   return (

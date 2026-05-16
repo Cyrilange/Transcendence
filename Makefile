@@ -23,10 +23,10 @@ up:
 		-cert-file ./nginx/certs/cert.pem \
 		localhost 127.0.0.1 2>/dev/null || true
 	@docker compose -f $(COMPOSE_FILE) up --build -d
-	@sleep 2 && (cmd.exe /c start chrome --ignore-certificate-errors --ignore-urlfetchfailures https://localhost 2>/dev/null || \
-		powershell.exe -Command "Start-Process 'chrome' '--ignore-certificate-errors --ignore-urlfetchfailures https://localhost'" 2>/dev/null || \
-		google-chrome --ignore-certificate-errors https://localhost 2>/dev/null || \
-		chromium-browser --ignore-certificate-errors https://localhost 2>/dev/null) &
+	@sleep 2 && (cmd.exe /c start chrome --ignore-certificate-errors --ignore-urlfetchfailures https://localhost:8443 2>/dev/null || \
+		powershell.exe -Command "Start-Process 'chrome' '--ignore-certificate-errors --ignore-urlfetchfailures https://localhost:8443'" 2>/dev/null || \
+		google-chrome --ignore-certificate-errors https://localhost:8443 2>/dev/null || \
+		chromium-browser --ignore-certificate-errors https://localhost:8443 2>/dev/null) &
 	@echo "[i] Done !"
 
 down:

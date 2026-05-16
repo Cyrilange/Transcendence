@@ -102,7 +102,7 @@ class GameService {
     const deck = await this.loadUserDeck();
     const shuffled = this.shuffleDeck(deck);
 
-    const needed = playerCount * 30;
+    const needed = playerCount * 25;
     console.log("DECK LENGTH =", shuffled.length, "NEEDED =", needed);
     if (shuffled.length < needed)
       throw new Error('Not enough cards in deck');

@@ -249,14 +249,6 @@ _npm install express axios body-parser dotenv_ for API42
 _npm install better-sqlite3_ for database
 _npm install express-session_ to keep session open 
 
-## HTTPS trust (mkcert)
-
-`make up` now runs `mkcert -install` to register mkcert's local CA with
-the OS/browser trust stores. Without this step the browser shows
-"Not Secure" on `https://localhost` because it doesn't recognise the CA
-that signed the cert. First run prompts for `sudo` once per machine
-(idempotent afterwards).
-
 ## cert for htpps 
 
 mkdir -p nginx/certs

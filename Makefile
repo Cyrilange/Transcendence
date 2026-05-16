@@ -14,10 +14,6 @@ up:
 		curl -sLo $(MKCERT_BIN) https://github.com/FiloSottile/mkcert/releases/download/$(MKCERT_VERSION)/mkcert-$(MKCERT_VERSION)-linux-amd64; \
 		chmod +x $(MKCERT_BIN); \
 	fi
-	@echo "[i] Installing mkcert local CA into trust stores (one-time; may prompt for sudo)..."
-	@CAROOT=$(HOME)/.local/share/mkcert \
-		PATH="$(HOME)/.local/bin:$$PATH" \
-		mkcert -install || true
 	@echo "[i] Generating SSL certificates..."
 	@CAROOT=$(HOME)/.local/share/mkcert \
 		PATH="$(HOME)/.local/bin:$$PATH" \

@@ -41,12 +41,12 @@ class ApiService {
     return this.token;
   }
 
-  async fetchUsers(totalCards = 150, campusId = 37) {
+  async fetchUsers(totalCards = 130, campusId = 37) {
     const token = await this.getToken();
 
     const pageNumbers = [];
     while (pageNumbers.length < 5) {
-      const page = Math.floor(Math.random() * 15) + 1;
+      const page = Math.floor(Math.random() * 12) + 1;
       if (!pageNumbers.includes(page)) pageNumbers.push(page);
     }
 

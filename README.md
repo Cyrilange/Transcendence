@@ -182,6 +182,15 @@ The application uses a single SQLite database (`data/transcendence.db`).
 
 # RULES OF THE GAME 
 
+Each player have 25 cards
+max 4 players
+each player have 3 differents atatcks, wallet point and start date 
+you can only see your cards and only the one you playing with 
+lets say you click on wallet , if you have a bigger wallet than the ooponent you win the round 
+when a round is lost you loose your turn 
+cards go to the pile then they are given
+
+
 ### TopTrumps 42 (2D)
 - [[Top trump rules]]
 - There are multiple deck options (we can unlock these through wins).
@@ -203,7 +212,9 @@ node server.js
 Server runs on: (for now ) 
 
 ```
-http://localhost:3001
+http://localhost:3001 , https://localhost:8443
+
+or simply do make or make re
 ```
 
 ---

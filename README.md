@@ -143,6 +143,12 @@ GDPR compliance features.
 ### Team Information
 csalamit : 
 Aternero : 
+ssive7b : Developer (backend testing, security & tooling)
+
+
+### Individual Contributions
+
+- **ssive7b**: backend test coverage (game logic, round mechanics, authentication), HTTPS trust configuration, and containerized test tooling.
 
 
 ### Project Management:

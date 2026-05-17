@@ -4,7 +4,7 @@
   "description": "the backend of the project",
   "main": "server.js",
   "scripts": {
-    "test": "node --test tests/gameService.test.js",
+    "test": "node --test tests/gameService.test.js tests/middleware-auth.test.js",
     "start": "node server.js"
   },
   "author": "cyril",

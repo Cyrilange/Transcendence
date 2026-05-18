@@ -10,7 +10,7 @@ import {
 } from '@mui/joy';
 
 
-export const TermsOfService = () => {
+export const DataPolicy = () => {
   return (
     <Sheet 
       variant="outlined" 

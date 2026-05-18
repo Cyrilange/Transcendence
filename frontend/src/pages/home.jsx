@@ -27,17 +27,18 @@ function Home() {
   const [user, setUser] = useState(null);
   const [slots, setSlots] = useState([]);
 
-const refreshUser = async () => {
-  try {
-    const res = await axios.get('/auth/me', { withCredentials: true });
+  const refreshUser = async () => {
+    try {
+      const res = await axios.get('/auth/me', { withCredentials: true });
       setUser(res.data.user !== undefined ? res.data.user : res.data);
-  } catch {
-    setUser(null);
-  }
-};
-useEffect(() => {
-  refreshUser();
-}, []);
+    } catch {
+      setUser(null);
+    }
+  };
+
+  useEffect(() => {
+    refreshUser();
+  }, []);
 
   const handleLoginSuccess = (userData) => setUser(userData);
   const handleLogout = () => { setUser(null); setSlots([]); };
@@ -69,7 +70,7 @@ useEffect(() => {
       if (res.data.success) {
         navigate(`/game/${joinId.trim()}`);
       }
-    } catch (err) {
+    } catch {
       setJoinError('Game not found');
     }
   };
@@ -77,25 +78,29 @@ useEffect(() => {
   const hasOpponents = slots.length > 0;
   const showPhantom = slots.length < MAX_OPPONENTS;
 
+  // The creator's 42 login (or display_name as fallback) is sent to the backend
+  // so player_1's name slot is populated with the real username from the start.
+  const creatorName = user?.login ?? user?.display_name ?? user?.name ?? 'Player 1';
+
   return (
     <div style={{ minHeight: '100vh', overflowY: 'auto', padding: '24px 0' }}>
       {user ? (
-    <Stack direction="column" alignItems="center" spacing={3} sx={{ pb: 4 }}>
-           <div
-          className="player-row"
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: '16px',
-            alignItems: 'flex-start',
-            justifyContent: 'center',
-            transition: 'all 0.3s ease',
-            padding: '0 16px',
-            width: '100%',
-            boxSizing: 'border-box',
-          }}
-        >
+        <Stack direction="column" alignItems="center" spacing={3} sx={{ pb: 4 }}>
+          <div
+            className="player-row"
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              gap: '16px',
+              alignItems: 'flex-start',
+              justifyContent: 'center',
+              transition: 'all 0.3s ease',
+              padding: '0 16px',
+              width: '100%',
+              boxSizing: 'border-box',
+            }}
+          >
             <ProfileCard user={user} onLogout={handleLogout} onUpdate={(updatedUser) => setUser(updatedUser)} onRefresh={refreshUser} />
 
             {slots.map((slot, index) => (
@@ -121,6 +126,8 @@ useEffect(() => {
                 closePopUp={() => setShowPopUp(false)}
                 title="New game"
                 slots={slots}
+                // Pass the creator's username so the backend names player_1 correctly
+                playerName={creatorName}
               />
             </Stack>
           )}
@@ -163,7 +170,6 @@ useEffect(() => {
             onLoginSuccess={handleLoginSuccess}
           />
         </Stack>
-        
       )}
     </div>
   );

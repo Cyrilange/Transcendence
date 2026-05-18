@@ -55,13 +55,10 @@ app.use('/api/users', userRoutes);
 app.use('/api/db', dbRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/games', require('./routes/games')(io));
-
  
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
-
-
  
 function updateStats(game) {
   if (game.status !== 'finished') return;
@@ -121,6 +118,8 @@ io.on('connection', (socket) => {
     if (unassigned) {
       unassigned.socketId = socket.id;
       unassigned.login = login;
+      // Always update the name to the real login so it shows correctly for everyone
+      if (login) unassigned.name = login;
       socket.playerId = unassigned.id;
       socket.emit('player_assigned', { playerId: unassigned.id });
       console.log(`Socket ${socket.id} assigned to ${unassigned.id} (login: ${login})`);
@@ -134,9 +133,9 @@ io.on('connection', (socket) => {
         socket.emit('player_assigned', { playerId: socket.playerId });
       }
     }
- 
-    socket.emit('game_state', game);
-    socket.to(gameId).emit('player_joined', { userId: socket.id });
+
+    // Broadcast updated state to the whole room so all clients see the new name immediately
+    io.to(gameId).emit('game_state', game);
     triggerBotTurnIfNeeded(gameId);
   });
  
@@ -174,4 +173,3 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
- 

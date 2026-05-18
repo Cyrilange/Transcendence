@@ -85,8 +85,9 @@ class GameService {
   }
 
   dealHands(players, deck) {
-    //const perPlayer = Math.floor(deck.length / players.length);
-    const perPlayer = 30;
+    // Always deal exactly 30 cards split evenly — e.g. 2 players = 15 each, 3 = 10 each
+    const totalCards = 30;
+    const perPlayer = Math.floor(totalCards / players.length);
     players.forEach((p, i) => {
       p.hand = deck.slice(i * perPlayer, (i + 1) * perPlayer).map(card => ({
         ...card,
@@ -98,25 +99,29 @@ class GameService {
     return players;
   }
 
-  async createGame(gameId, playerCount, vsComputer, rounds, gameType = 'endless', difficulty = 'medium') {
+  // playerName: the 42 login (or display name) of the game creator
+  async createGame(gameId, playerCount, vsComputer, rounds, gameType = 'endless', difficulty = 'medium', playerName = 'Player 1') {
     const deck = await this.loadUserDeck();
     const shuffled = this.shuffleDeck(deck);
 
-    const needed = playerCount * 25;
+    const needed = 30;
+
     console.log("DECK LENGTH =", shuffled.length, "NEEDED =", needed);
     if (shuffled.length < needed)
       throw new Error('Not enough cards in deck');
 
     const players = Array.from({ length: playerCount }, (_, i) => ({
-      id: i === 0 ? 'player_1' : `opponent_${i}`,
-      name: i === 0 ? 'Player 1' : `opponent_${i}`,
+      id: i === 0 ? 'player_1' : `bot_${i}`,
+      // Creator gets their real name; bots get "Bot N"; human slots get a placeholder replaced on join
+      name: i === 0 ? playerName : `Bot ${i}`,
       hand: [],
       roundWins: 0,
       socketId: null,
       isBot: vsComputer && i !== 0
     }));
 
-    this.dealHands(players, shuffled);
+    // Use exactly the first `needed` shuffled cards so dealHands always has 30 available
+    this.dealHands(players, shuffled.slice(0, needed));
 
     const gameState = {
       id: gameId,
@@ -165,7 +170,7 @@ class GameService {
 
     console.log('--- Round', game.currentRound + 1, '---');
     topCards.forEach(({ player, value }) =>
-      console.log(`  ${player.id}: ${value} (${comparisonField})`)
+      console.log(`  ${player.id} (${player.name}): ${value} (${comparisonField})`)
     );
 
     const isLowerWins = comparisonField === 'startDate';
@@ -199,12 +204,13 @@ class GameService {
       winner.hand.push(...game.pile);
       winner.roundWins += 1;
       game.pile = [];
-      console.log(`  WINNER: ${winner.id} — hand: ${winner.hand.length}`);
+      console.log(`  WINNER: ${winner.id} (${winner.name}) — hand: ${winner.hand.length}`);
 
       roundResult = {
         round: game.currentRound,
         type: 'winner',
         winnerId: winner.id,
+        winnerName: winner.name,
         losers: losers.map(l => l.player.id),
         comparisonField,
         winningValue: bestValue,

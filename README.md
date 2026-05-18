@@ -7,26 +7,25 @@ _This project has been created as part of the 42 curriculum by csalamit, aterner
 
 ###### -aehrl PO . Developers
 
-Defines the product vision, prioritizes features, and ensures the project meets user needs.
-
-logic of the game  , fronted + backend inplementation of the game 
+* Defines the product vision, prioritizes features, and ensures the project meets user needs.
+* Defines the logic of the game, frontend and backend implementation of the game .
 
 
 ###### -csalamit PM . Developers
 
-team coordination and removes obstacles.
-
-Docker + backend supervisor
+* Team coordination: Organizes meetings, sets deadlines, and ensures effective communication among team members.
+* Removes obstacles: Identifies and addresses any issues that may hinder the team's progress, ensuring a smooth development process. The PM is responsible for ensuring that the project stays on track, meets deadlines, and that the team is working effectively together. They facilitate communication, manage resources, and help resolve any conflicts or challenges that arise during development. The PM's role is crucial for maintaining.
+* Docker and backend deployment: Responsible for setting up the deployment pipeline, including containerization with Docker and ensuring the backend is properly deployed and accessible. This includes configuring the server, managing environment variables, and ensuring that the application runs smoothly in a production environment. The PM will work closely with the backend developer to ensure that the deployment process is efficient and reliable.
 
 
 ###### -aternero . Developers
 
-Specialist of UI/UX , unit tests
+* Frontend development, including UI/UX design and implementation. Responsible for creating a visually appealing and user-friendly interface for the game, ensuring that it is responsive and accessible across different devices. This includes designing the layout, choosing color schemes, and implementing interactive elements to enhance the user experience.
 
 
 ###### -sstoev . Developers
 
-Specialist of backend
+* Specialist of backend development, responsible for implementing the server-side logic, database management, and API integration. This includes designing the database schema, implementing authentication and user management, and ensuring that the backend can handle game logic and real-time interactions effectively. The backend developer will work closely with the PM to ensure that the deployment process is efficient and reliable.
 
 #### General requirements
 -  The project must be a web application, and requires a frontend, backend, and a database.

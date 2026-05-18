@@ -8,7 +8,8 @@ _This project has been created as part of the 42 curriculum by csalamit, aterner
 ###### -aehrl PO . Developers
 
 * Defines the product vision, prioritizes features, and ensures the project meets user needs.
-* Defines the logic of the game, frontend and backend implementation of the game .
+* Defines the logic of the game, frontend and backend implementation of the game 
+* Frontend development, including UI/UX design and implementation. Responsible for creating a visually appealing and user-friendly interface for the game, ensuring that it is responsive and accessible across different devices. This includes designing the layout, choosing color schemes, and implementing interactive elements to enhance the user experience.
 
 
 ###### -csalamit PM . Developers
@@ -20,8 +21,7 @@ _This project has been created as part of the 42 curriculum by csalamit, aterner
 
 ###### -aternero . Developers
 
-* Frontend development, including UI/UX design and implementation. Responsible for creating a visually appealing and user-friendly interface for the game, ensuring that it is responsive and accessible across different devices. This includes designing the layout, choosing color schemes, and implementing interactive elements to enhance the user experience.
-
+* Frontend development, including UI/UX design and implementation. Responsible for creating a visually appealing and user-friendly interface for the game, ensuring that it is responsive and accessible across different devices.
 
 ###### -sstoev . Developers
 
@@ -63,7 +63,7 @@ _This project has been created as part of the 42 curriculum by csalamit, aterner
 ## Modules
 You will need to earn 14 points in total to complete your project. Each major module is worth 2 points, and each minor module is worth 1 point.
 
-### Gaming and user experience (8 Points)
+### Gaming and user experience (7 Points)
 #### Major 1 - Game
 Implement a complete web-based game where users can play against each other. 
 - The game can be real-time multiplayer (e.g., Pong, Chess, Tic-Tac-Toe, Card games, etc.).  TopTrunks Game!!!
@@ -83,99 +83,52 @@ Multiplayer game (more than two players).
 
 #### Minor 1 - Game customisation
 Game customisation options.
- - Power-ups, attacks, or special abilities.
- - Different maps or themes.
-	 - Player can select Custom Deck (coalitions) or playmat backgroung
  - Customisable game settings.
 	 - default (all cards must be won)
 	 - Round based (best of n rounds)
-	 - First to Win n rounds
- - Default options must be available.
-#### Minor 2 - Gamification system 
-A gamification system to reward users for their actions.
-- Implement at least 3 of the following: achievements, badges, leaderboards, XP/level system, daily challenges, rewards
-	- XP/Level, Rewards (decks & Customisation), Achievements
-- System must be persistent (stored in database)
-- Visual feedback for users (notifications, progress bars, etc.)
-- Clear rules and progression mechanics
 
-
-### Web ( 4 Points)
+### Web ( 5 Points)
 #### Major - Framework Front & Backend
 Use a framework for both the frontend and backend. 
-- Use a frontend framework (React, Vue, Angular, Svelte, etc.).
-- Use a backend framework (Express, NestJS, Django, Flask, Ruby on Rails, etc.).
-- Full-stack frameworks (Next.js, Nuxt.js, SvelteKit) count as both if you use both their frontend and backend capabilities
+- Use a frontend framework (React).
+- Use a backend framework (Express).
+
 #### Minor - Custom-made design system
 Custom-made design system with reusable components, including a proper color palette, typography, and icons (minimum: 10 reusable components).
 
-#### Minor - Search system (search your cards?)
-Implement advanced search functionality with filters, sorting, and pagination
-
-#### Major 3 - API (OHH MAYBE NO)
+#### Major 3 - API
 A public API to interact with the database with a secured API key, rate limiting, documentation, and at least 5 endpoints: 
 - GET /api/{something} 
 - POST /api/{something} 
 - PUT /api/{something} 
-- DELETE /api/{something}
 
-### Accessibility and Internationalisation ( 1 - 2 Points)
-#### Minor - Language (Spanish, English, German)
-Support for multiple languages (at least 3 languages).
-- Implement i18n (internationalization) system. 
-- At least 3 complete language translations. 
-- Language switcher in the UI. 
-- All user-facing text must be translatable.
-
-#### Minor - Additional browser support
-Support for additional browsers.
-- Full compatibility with at least 2 additional browsers (Firefox, Safari, Edge, etc.).
-- Test and fix all features in each browser.
-- Document any browser-specific limitations.
-- Consistent UI/UX across all supported browsers.
-### User Management (2 - 4 Points)
+### User Management (2Points)
 #### Minor - Game stats & History
-Game statistics and match history (requires a game module).
-- Track user game statistics (wins, losses, ranking, level, etc.).
-- Display match history (1v1 games, dates, results, opponents).
-- Show achievements and progression. 
-- Leaderboard integration
-#### Minor - 2.0 Auth (Have to be in 42 to play??)
-Implement remote authentication with OAuth 2.0 (Google, GitHub, 42, etc.).
-#### Minor - 2FA
-Implement a complete 2FA (Two-Factor Authentication) system for the users
-#### Minor - Activity & Analytics (maybe)
-User activity analytics and insights dashboard.
+Game statistics and match history.
+- Track user game statistics (wins).
+
+#### Minor - 2.0 Auth
+Implement remote authentication with OAuth 2.0 (42).
+
 
 ### AI (2 Points)
 #### Major - AI opponent
 Introduce an AI Opponent for games.
-- The AI must be challenging and able to win occasionally. 
-- The AI should simulate human-like behaviour (not perfect play).
-- If you implement game customisation options, the AI must be able to use them. 
-	- Can choose deck / play mat  Background
-- You must be able to explain your AI implementation during evaluation.
+- The AI has three levels easy, mid and hard, that simulates different playing styles.
 ### Devops ()
-
-### Data and Analytics (1 Point)
-#### Minor 1 - GDPR features
-GDPR compliance features.
-- Allow users to request their data.
-- Data deletion with confirmation. 
-- Export user data in a readable format.
-- Confirmation emails for data operations
 
 
 
 ### Team Information
-csalamit : 
-Aternero : 
-ssive7b : Developer (backend testing, security & tooling)
+aehrl: Product owner and frontend developer (Design creator and frontend game setup) 
+csalamit : Project manager and backend developer (Team coordination and setup of server and database)
+aternero : Developer (frontend)
+sstoev : Developer (backend testing, security & tooling)
 
 
 ### Individual Contributions
 
-- **ssive7b**: backend test coverage (game logic, round mechanics, authentication), HTTPS trust configuration, and containerized test tooling.
+- **sstoev**: backend test coverage (game logic, round mechanics, authentication), HTTPS trust configuration, and containerized test tooling.
 
 
 ### Project Management:

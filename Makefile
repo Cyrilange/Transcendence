@@ -27,7 +27,15 @@ up:
 		powershell.exe -Command "Start-Process 'chrome' '--ignore-certificate-errors --ignore-urlfetchfailures https://localhost:8443'" 2>/dev/null || \
 		google-chrome --ignore-certificate-errors https://localhost:8443 2>/dev/null || \
 		chromium-browser --ignore-certificate-errors https://localhost:8443 2>/dev/null) &
-	@echo "[i] Done !"
+	@HOST_IP=$$(hostname -I 2>/dev/null | awk '{print $$1}' || ipconfig getifaddr en0 2>/dev/null || echo "unknown"); \
+		echo ""; \
+		echo "╔══════════════════════════════════════════╗"; \
+		echo "║         ft_transcendence is up!          ║"; \
+		echo "╠══════════════════════════════════════════╣"; \
+		echo "║  Local:   https://localhost:8443         ║"; \
+		printf "║  Network: https://%-22s║\n" "$$HOST_IP:8443"; \
+		echo "╚══════════════════════════════════════════╝"; \
+		echo ""
 
 down:
 	@docker compose -f $(COMPOSE_FILE) down

@@ -12,19 +12,19 @@ Defines the product vision, prioritizes features, and ensures the project meets 
 logic of the game  , fronted + backend inplementation of the game 
 
 
-###### -csalamit PM .Developers
+###### -csalamit PM . Developers
 
 team coordination and removes obstacles.
 
 Docker + backend supervisor
 
 
-###### -aternero
+###### -aternero . Developers
 
 Specialist of UI/UX , unit tests
 
 
-###### -sstoev 
+###### -sstoev . Developers
 
 Specialist of backend
 
@@ -430,3 +430,32 @@ mv localhost+1-key.pem ~/Transcendence/nginx/certs/key.pem
 
 
 # RESSOURCE
+
+## Documentation
+
+* [42 API Documentation](https://api.intra.42.fr/apidoc) : Official documentation for the 42 API, essential for integrating user authentication and data retrieval.
+* [Doc React](https://es.react.dev/) : Official React documentation, a great resource for learning React concepts and best practices.
+* [Docker](https://docs.docker.com/) : Official Docker documentation for containerization and deployment.
+* [Express framework](https://expressjs.com/) : Express.js documentation, a minimal and flexible Node.js web application framework.
+* [GitHub](https://docs.github.com/en) : GitHub documentation for version control and collaboration.
+* [Material UI / MUI](https://mui.com/) : A popular React UI framework with a comprehensive set of pre-built components and a customizable design system.
+* [Node.js](https://nodejs.org/en/docs/) : Official Node.js documentation, essential for backend development with Express.
+
+## Learning Resources
+
+* [Aprendiendo Git y GitHub: Desde cero hasta buenas prácticas y estrategias de trabajo en equipo](https://www.amazon.es/Aprendiendo-Git-GitHub-pr%C3%A1cticas-estrategias/dp/B0D2LPMG6F?ie=UTF8&tag=hydes-21&hvadid=722222742463&hvpos=&hvexid=&hvnetw=g&hvrand=7550724054302413617&hvpone=&hvptwo=&hvqmt=&hvdev=c&ref=pd_sl_21gxdi1o00_e&tag=&ref=&adgrpid=168856555894&hvpone=&hvptwo=&hvadid=722222742463&hvpos=&hvnetw=g&hvrand=7550724054302413617&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9197933&hvtargid=dsa-1595363597442&hydadcr=&mcid=&gad_source=1) : A comprehensive guide to learning Git and GitHub, covering everything from basic commands to advanced workflows and best practices for team collaboration.
+* [W3Schools](https://www.w3schools.com/) : A comprehensive resource for learning web development technologies, including HTML, CSS, JavaScript, and more.
+	* [HTML](https://www.w3schools.com/html/default.asp) : Learn the basics of HTML for structuring web pages.
+	* [CSS](https://www.w3schools.com/css/default.asp) : Learn how to style web pages using CSS.
+	* [JavaScript](https://www.w3schools.com/js/default.asp) : Learn JavaScript for adding interactivity to web pages.
+	* [React](https://www.w3schools.com/react/default.asp) : A beginner-friendly introduction to React.js.
+	* [Node.js](https://www.w3schools.com/nodejs/default.asp) : Learn Node.js for server-side development.
+
+## Communication Tools
+
+* [Slack](https://slack.com/) : For team communication and collaboration.
+* [WhatsApp](https://www.whatsapp.com/) : For team communication and coordination.
+
+## Project Management Tools
+
+* [GitHub Projects](https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects) : For project management and task tracking using GitHub's built-in project boards.
